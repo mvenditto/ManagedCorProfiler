@@ -20,34 +20,32 @@ To test the concept, the example does a few basic things:
 ## Sample output
 <pre><samp>C:\ManagedCorProfiler\ManagedCorProfiler> <kbd>.\run.cmd</kbd>
 DllMain(reason=DLL_PROCESS_ATTACH)
-DllGetClassObject()
-DllMain(reason=DLL_THREAD_ATTACH)
+DllGetClassObject(reason=DLL_THREAD_ATTACH)
         RCLSID = cf0d821e-299b-5307-a3d8-b283c03916dd
         RIID   = 00000001-0000-0000-c000-000000000046
-ClassFactory!QueryInterface->ADD_REF
-CorProfilerComWrappers
-CorProfilerComWrappers!ComputeVtables
-MyProfiler!InitializeICorProfilerCallback!Initialize(): profInfo 20A0A6071D0
-DllMain(reason=DLL_THREAD_ATTACH)
-ICorProfilerCallback!ModuleLoadFinished(0x7FFCCD4B4000)
-Loaded Moudle -> 'C:\Users\mvenditto\Source\Repos\runtime\artifacts\bin\coreclr\windows.x64.Debug\System.Private.CoreLib.dll'
-ICorProfilerCallback!ModuleLoadFinished(0x7FFCCDD741A0)
-Loaded Moudle -> 'C:\Users\mvenditto\Source\Repos\ManagedCorProfiler\SampleApp\bin\Debug\net7.0\vtbl_test.dll'
-ICorProfilerCallback!ModuleLoadFinished(0x7FFCCDD75E78)
+MyProfiler!Initialize:::ICorProfilerCallback!Initialize()
+Loaded Moudle -> 'C:\Users\user\..\runtime\artifacts\bin\coreclr\windows.x64.Debug\System.Private.CoreLib.dll'
+Loaded Moudle -> 'C:\Users\user\..\SampleApp\bin\Debug\net7.0\SampleApp.dll'
 Loaded Moudle -> 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\7.0.0\system.runtime.dll'
-ICorProfilerCallback!ModuleLoadFinished(0x7FFCCDF0E960)
 Loaded Moudle -> 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\7.0.0\system.console.dll'
-DllMain(reason=DLL_THREAD_ATTACH)
-ICorProfilerCallback!ModuleLoadFinished(0x7FFCCDF31538)
 Loaded Moudle -> 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\7.0.0\system.threading.dll'
-ICorProfilerCallback!ModuleLoadFinished(0x7FFCCDF36C68)
 Loaded Moudle -> 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\7.0.0\system.text.encoding.extensions.dll'
-ICorProfilerCallback!ModuleLoadFinished(0x7FFCCDF3DCC0)
 Loaded Moudle -> 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\7.0.0\system.runtime.interopservices.dll'
+[... OMITTED ...]
+=> GetPinnableReference()
+=> get_Length()
+=> WriteFile()
+=> SetLastSystemError()
 Hello World!
-
+=> GetLastSystemError()
+=> Flush()
+=> Flush()
+Hello World!
+=> OnProcessExit()
+[... OMITTED ...]
 C:\ManagedCorProfiler\ManagedCorProfiler> █</samp></pre>
-
+> output is actually interleaved, formatted and trimmed for clarity
+> 
 ## Other approaches or variations
 > not tested, just off the top of my head
 - [DNNE](https://github.com/AaronRobinsonMSFT/DNNE) + managed assembly implementing the profiler itself
