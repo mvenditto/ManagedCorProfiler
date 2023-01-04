@@ -5,6 +5,9 @@ A prototype [.NET profiler](https://learn.microsoft.com/en-us/dotnet/framework/u
 > 🚧 WIP WIP WIP 🚧
 > MORE INFO AND INSTRUCTION SOON
 
+## Overview
+<img src="/docs/images/overview.png"></img>
+
 ## Sample
 The sample produces a native DLL that can be loaded as a CLR Profiler.
 
@@ -72,12 +75,21 @@ C:\ManagedCorProfiler\ManagedCorProfiler> █</samp></pre>
 ## Function Hooks
 TBD
 
-## References
- - [https://learn.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/](https://learn.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/)
- - [https://github.com/dotnet/samples/blob/main/core/interop/comwrappers/Tutorial/Program.cs](https://github.com/dotnet/samples/blob/main/core/interop/comwrappers/Tutorial/Program.cs)
- - [https://minidump.net/writing-a-net-profiler-in-c-part-1-d3978aae9b12](https://minidump.net/writing-a-net-profiler-in-c-part-1-d3978aae9b12)
- - [https://learn.microsoft.com/en-us/dotnet/standard/native-interop/tutorial-comwrappers](https://learn.microsoft.com/en-us/dotnet/standard/native-interop/tutorial-comwrappers)
+## Resources
+### Misc
+- [Writing a .NET Profiler in C# by Kevin Gosse](https://minidump.net/writing-a-net-profiler-in-c-part-1-d3978aae9b12)
 - [https://github.com/dotnet/runtime](https://github.com/dotnet/runtime)
-- [https://github.com/mvenditto/clr-samples/tree/master/ProfilingAPI](https://github.com/mvenditto/clr-samples/tree/master/ProfilingAPI)
-- [https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/)
-- [https://learn.microsoft.com/en-us/windows/win32/api/combaseapi/nf-combaseapi-dllgetclassobject](https://learn.microsoft.com/en-us/windows/win32/api/combaseapi/nf-combaseapi-dllgetclassobject)
+### COM / COM Interop
+- [DllGetClassObject](https://learn.microsoft.com/en-us/windows/win32/api/combaseapi/nf-combaseapi-dllgetclassobject)
+- [ComWrappers Tutorial](https://learn.microsoft.com/en-us/dotnet/standard/native-interop/tutorial-comwrappers)
+- [ComWrappers interop sample](https://github.com/dotnet/samples/blob/main/core/interop/comwrappers/Tutorial/Program.cs)
+### Profiling
+- [Profiling Overview](https://learn.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/profiling-overview)
+- [Unmanaged profiling API](https://learn.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/)
+- [CoreCLR Profilin BOTR](https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/botr/profiling.md)
+- [clr-sample ProfilingAPI](https://github.com/mvenditto/clr-samples/tree/master/ProfilingAPI)
+- [Profiling Interfaces](https://learn.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/profiling-interfaces)
+- [Profiling global static function](https://learn.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/profiling-global-static-functions)
+### Native AOT
+- [NativeAOT Interop](https://github.com/dotnet/runtime/blob/main/src/coreclr/nativeaot/docs/interop.md)
+- [Deploying NativeAOT](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/)
