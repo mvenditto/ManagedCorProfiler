@@ -1,4 +1,5 @@
-﻿using ManagedCorProfiler.ComInterop.Interfaces;
+﻿using CorProf.Bindings;
+using ManagedCorProfiler.ComInterop.Interfaces;
 using ManagedCorProfiler.Utilities;
 using System.Collections;
 using System.Diagnostics;
@@ -227,9 +228,9 @@ namespace ManagedCorProfiler.ComInterop.Wrappers
                 var entries = (ComInterfaceEntry*)RuntimeHelpers.AllocateTypeAssociatedMemory(
                     typeof(CorProfilerComWrappers),
                     sizeof(ComInterfaceEntry) * s_CorProfilerImplDefinitionLen);
-                entries[idx].IID = ICorProfilerCallback.IID_ICorProfilerCallback;
+                entries[idx].IID = CorProfConsts.IID_ICorProfilerCallback;
                 entries[idx++].Vtable = s_ICorProfilerCallbackVtbl;
-                entries[idx].IID = ICorProfilerCallback2.IID_ICorProfilerCallback2;
+                entries[idx].IID = CorProfConsts.IID_ICorProfilerCallback2;
                 entries[idx++].Vtable = s_ICorProfilerCallback2Vtbl;
                 Debug.Assert(s_CorProfilerImplDefinitionLen == idx);
                 s_CorProfilerImplDefinition = entries;

@@ -1,8 +1,7 @@
-using ManagedCorProfiler.ComInterop;
-using ManagedCorProfiler.ComInterop.Interfaces;
-using ManagedCorProfiler.Utilities;
+using CorProf.Bindings;
 using System.Runtime.InteropServices;
 using static System.Runtime.InteropServices.ComWrappers;
+using ICorProfilerCallback = ManagedCorProfiler.ComInterop.Interfaces.ICorProfilerCallback;
 
 static unsafe class ICorProfilerCallbackManagedWrapper
 {

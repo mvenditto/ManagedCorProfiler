@@ -1,5 +1,4 @@
-﻿using ManagedCorProfiler.ComInterop.Impl;
-using Microsoft.Diagnostics.Runtime.Utilities;
+﻿using Microsoft.Diagnostics.Runtime.Utilities;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 

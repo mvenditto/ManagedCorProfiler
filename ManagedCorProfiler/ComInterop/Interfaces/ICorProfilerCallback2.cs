@@ -1,3 +1,4 @@
+using CorProf.Bindings;
 using ManagedCorProfiler.Utilities;
 using Microsoft.Diagnostics.Runtime.Utilities;
 

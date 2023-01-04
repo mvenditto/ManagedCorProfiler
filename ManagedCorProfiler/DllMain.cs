@@ -1,10 +1,9 @@
 ﻿using Microsoft.Diagnostics.Runtime.Utilities;
 using System.Runtime.InteropServices;
-using ManagedCorProfiler.ComInterop;
 using ManagedCorProfiler.Utilities;
 using ManagedCorProfiler.ComInterop.Wrappers;
 using System.Diagnostics;
-using System;
+using CorProf.Bindings;
 
 namespace ManagedCorProfiler
 {

@@ -5,6 +5,9 @@
 
 *.zip
 include/
+*.exp
+*.lib
+*.dll
 
 # User-specific files
 *.rsuser

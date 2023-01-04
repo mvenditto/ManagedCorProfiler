@@ -1,4 +1,5 @@
-﻿using ManagedCorProfiler.ComInterop.Interfaces;
+﻿using CorProf.Bindings;
+using ManagedCorProfiler.ComInterop.Interfaces;
 using Microsoft.Diagnostics.Runtime.Utilities;
 using System.Runtime.InteropServices;
 
@@ -15,7 +16,7 @@ namespace ManagedCorProfiler.ComInterop.Wrappers
 
         public static CorProfilerDynamicWrapper? CreateIfSupported(IntPtr ptr)
         {
-            var iid = ICorProfilerCallback.IID_ICorProfilerCallback;
+            var iid = CorProfConsts.IID_ICorProfilerCallback;
             int hr = Marshal.QueryInterface(ptr, ref iid, out IntPtr ICorProfilerCallbackInst);
 
             if (hr != HResult.S_OK)
@@ -23,7 +24,7 @@ namespace ManagedCorProfiler.ComInterop.Wrappers
                 return default;
             }
 
-            iid = ICorProfilerCallback.IID_ICorProfilerCallback2;
+            iid = CorProfConsts.IID_ICorProfilerCallback2;
             hr = Marshal.QueryInterface(ptr, ref iid, out IntPtr ICorProfilerCallback2Inst);
 
             if (hr != HResult.S_OK)
@@ -59,8 +60,8 @@ namespace ManagedCorProfiler.ComInterop.Wrappers
 
         public bool IsInterfaceImplemented(RuntimeTypeHandle interfaceType, bool throwIfNotImplemented)
         {
-            if (interfaceType.Equals(typeof(ICorProfilerCallback).TypeHandle)
-                || interfaceType.Equals(typeof(ICorProfilerCallback2).TypeHandle))
+            if (interfaceType.Equals(typeof(Guids).TypeHandle)
+                || interfaceType.Equals(typeof(Guids).TypeHandle))
             {
                 return true;
             }

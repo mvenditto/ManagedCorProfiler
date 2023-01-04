@@ -15,4 +15,10 @@
     <PackageReference Include="Microsoft.Diagnostics.Runtime" Version="2.2.343001" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Cor.Bindings\Cor.Bindings.csproj" />
+    <ProjectReference Include="..\CorHdr.Bindings\CorHdr.Bindings.csproj" />
+    <ProjectReference Include="..\CorProf.Bindings\CorProf.Bindings.csproj" />
+  </ItemGroup>
+
 </Project>
