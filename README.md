@@ -1,6 +1,6 @@
 # ManagedCorProfiler
 
-A prototype [.NET profiler](https://learn.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/) entirely written in C# leveraging [NativeAOT](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/) + [ComWrappers](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.comwrappers?view=net-7.0).
+A prototype [.NET profiler](https://learn.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/) written in C# leveraging [NativeAOT](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/) + [ComWrappers](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.comwrappers?view=net-7.0).
 
 > 🚧 WIP WIP WIP 🚧
 
@@ -10,7 +10,7 @@ The sample produces a native DLL that can be loaded as a CLR Profiler.
 To test the concept, the example does a few basic things:
  1. Exposes `DllGetClassObject` DLL entry point
  2. Implements `ICorProfilerCallback` + `ICorProfilerCallback2` interfaces
- 3. hooks to `ICorProfilerCallback::ModuleLoadFinished`
+ 3. hooks to `ICorProfilerCallback::ModuleLoadFinished` and `ICorProfilerInfo2::SetEnterLeaveFunctionHooks2`
  4. logs the name of every loaded module
 
 ## Sample output
@@ -63,6 +63,13 @@ C:\ManagedCorProfiler\ManagedCorProfiler> █</samp></pre>
 
 ## Next Work
 - some source generation magic to ease the creation of COM interfaces, wrappers and CLR types.
+
+## Codegen
+- code contained in the `*.Bindings` projects is generated using [ClangSharpPInvokeGenerator](https://github.com/dotnet/ClangSharp)
+- at this point, some manual tweaks are needed to make the generated bindings for an header compile (e.g fixing callconvs)
+
+## Function Hooks
+TBD
 
 ## References
  - [https://learn.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/](https://learn.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/)
