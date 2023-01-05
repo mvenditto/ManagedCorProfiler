@@ -3,142 +3,145 @@ using System.Runtime.InteropServices;
 using static System.Runtime.InteropServices.ComWrappers;
 using ICorProfilerCallback2 = ManagedCorProfiler.ComInterop.Interfaces.ICorProfilerCallback2;
 
-static unsafe class ICorProfilerCallback2ManagedWrapper
+namespace ManagedCorProfiler.ComInterop.Wrappers
 {
-
-    [UnmanagedCallersOnly]
-    public static unsafe int ThreadNameChanged(IntPtr _this, ulong threadId, uint cchName, ushort* name)
+    static unsafe class ICorProfilerCallback2ManagedWrapper
     {
-        try
-        {
-            var hr = ComInterfaceDispatch
-                .GetInstance<ICorProfilerCallback2>((ComInterfaceDispatch*)_this)
-                .ThreadNameChanged(threadId, cchName, name);
 
-            return hr;
-        }
-        catch (Exception ex)
+        [UnmanagedCallersOnly]
+        public static unsafe int ThreadNameChanged(IntPtr _this, ulong threadId, uint cchName, ushort* name)
         {
-            return ex.HResult;
-        }
-    }
+            try
+            {
+                var hr = ComInterfaceDispatch
+                    .GetInstance<ICorProfilerCallback2>((ComInterfaceDispatch*)_this)
+                    .ThreadNameChanged(threadId, cchName, name);
 
-    [UnmanagedCallersOnly]
-    public static unsafe int GarbageCollectionStarted(IntPtr _this, int cGenerations, int* generationCollected, COR_PRF_GC_REASON reason)
-    {
-        try
-        {
-            var hr = ComInterfaceDispatch
-                .GetInstance<ICorProfilerCallback2>((ComInterfaceDispatch*)_this)
-                .GarbageCollectionStarted(cGenerations, generationCollected, reason);
-
-            return hr;
+                return hr;
+            }
+            catch (Exception ex)
+            {
+                return ex.HResult;
+            }
         }
-        catch (Exception ex)
-        {
-            return ex.HResult;
-        }
-    }
 
-    [UnmanagedCallersOnly]
-    public static unsafe int SurvivingReferences(IntPtr _this, uint cSurvivingObjectIDRanges, ulong* objectIDRangeStart, uint* cObjectIDRangeLength)
-    {
-        try
+        [UnmanagedCallersOnly]
+        public static unsafe int GarbageCollectionStarted(IntPtr _this, int cGenerations, int* generationCollected, COR_PRF_GC_REASON reason)
         {
-            var hr = ComInterfaceDispatch
-                .GetInstance<ICorProfilerCallback2>((ComInterfaceDispatch*)_this)
-                .SurvivingReferences(cSurvivingObjectIDRanges, objectIDRangeStart, cObjectIDRangeLength);
+            try
+            {
+                var hr = ComInterfaceDispatch
+                    .GetInstance<ICorProfilerCallback2>((ComInterfaceDispatch*)_this)
+                    .GarbageCollectionStarted(cGenerations, generationCollected, reason);
 
-            return hr;
+                return hr;
+            }
+            catch (Exception ex)
+            {
+                return ex.HResult;
+            }
         }
-        catch (Exception ex)
-        {
-            return ex.HResult;
-        }
-    }
 
-    [UnmanagedCallersOnly]
-    public static unsafe int GarbageCollectionFinished(IntPtr _this)
-    {
-        try
+        [UnmanagedCallersOnly]
+        public static unsafe int SurvivingReferences(IntPtr _this, uint cSurvivingObjectIDRanges, ulong* objectIDRangeStart, uint* cObjectIDRangeLength)
         {
-            var hr = ComInterfaceDispatch
-                .GetInstance<ICorProfilerCallback2>((ComInterfaceDispatch*)_this)
-                .GarbageCollectionFinished();
+            try
+            {
+                var hr = ComInterfaceDispatch
+                    .GetInstance<ICorProfilerCallback2>((ComInterfaceDispatch*)_this)
+                    .SurvivingReferences(cSurvivingObjectIDRanges, objectIDRangeStart, cObjectIDRangeLength);
 
-            return hr;
+                return hr;
+            }
+            catch (Exception ex)
+            {
+                return ex.HResult;
+            }
         }
-        catch (Exception ex)
-        {
-            return ex.HResult;
-        }
-    }
 
-    [UnmanagedCallersOnly]
-    public static unsafe int FinalizeableObjectQueued(IntPtr _this, uint finalizerFlags, ulong objectID)
-    {
-        try
+        [UnmanagedCallersOnly]
+        public static unsafe int GarbageCollectionFinished(IntPtr _this)
         {
-            var hr = ComInterfaceDispatch
-                .GetInstance<ICorProfilerCallback2>((ComInterfaceDispatch*)_this)
-                .FinalizeableObjectQueued(finalizerFlags, objectID);
+            try
+            {
+                var hr = ComInterfaceDispatch
+                    .GetInstance<ICorProfilerCallback2>((ComInterfaceDispatch*)_this)
+                    .GarbageCollectionFinished();
 
-            return hr;
+                return hr;
+            }
+            catch (Exception ex)
+            {
+                return ex.HResult;
+            }
         }
-        catch (Exception ex)
-        {
-            return ex.HResult;
-        }
-    }
 
-    [UnmanagedCallersOnly]
-    public static unsafe int RootReferences2(IntPtr _this, uint cRootRefs, ulong* rootRefIds, COR_PRF_GC_ROOT_KIND* rootKinds, COR_PRF_GC_ROOT_FLAGS* rootFlags, ulong* rootIds)
-    {
-        try
+        [UnmanagedCallersOnly]
+        public static unsafe int FinalizeableObjectQueued(IntPtr _this, uint finalizerFlags, ulong objectID)
         {
-            var hr = ComInterfaceDispatch
-                .GetInstance<ICorProfilerCallback2>((ComInterfaceDispatch*)_this)
-                .RootReferences2(cRootRefs, rootRefIds, rootKinds, rootFlags, rootIds);
+            try
+            {
+                var hr = ComInterfaceDispatch
+                    .GetInstance<ICorProfilerCallback2>((ComInterfaceDispatch*)_this)
+                    .FinalizeableObjectQueued(finalizerFlags, objectID);
 
-            return hr;
+                return hr;
+            }
+            catch (Exception ex)
+            {
+                return ex.HResult;
+            }
         }
-        catch (Exception ex)
-        {
-            return ex.HResult;
-        }
-    }
 
-    [UnmanagedCallersOnly]
-    public static unsafe int HandleCreated(IntPtr _this, ulong handleId, ulong initialObjectId)
-    {
-        try
+        [UnmanagedCallersOnly]
+        public static unsafe int RootReferences2(IntPtr _this, uint cRootRefs, ulong* rootRefIds, COR_PRF_GC_ROOT_KIND* rootKinds, COR_PRF_GC_ROOT_FLAGS* rootFlags, ulong* rootIds)
         {
-            var hr = ComInterfaceDispatch
-                .GetInstance<ICorProfilerCallback2>((ComInterfaceDispatch*)_this)
-                .HandleCreated(handleId, initialObjectId);
+            try
+            {
+                var hr = ComInterfaceDispatch
+                    .GetInstance<ICorProfilerCallback2>((ComInterfaceDispatch*)_this)
+                    .RootReferences2(cRootRefs, rootRefIds, rootKinds, rootFlags, rootIds);
 
-            return hr;
+                return hr;
+            }
+            catch (Exception ex)
+            {
+                return ex.HResult;
+            }
         }
-        catch (Exception ex)
-        {
-            return ex.HResult;
-        }
-    }
 
-    [UnmanagedCallersOnly]
-    public static unsafe int HandleDestroyed(IntPtr _this, ulong handleId)
-    {
-        try
+        [UnmanagedCallersOnly]
+        public static unsafe int HandleCreated(IntPtr _this, ulong handleId, ulong initialObjectId)
         {
-            var hr = ComInterfaceDispatch
-                .GetInstance<ICorProfilerCallback2>((ComInterfaceDispatch*)_this)
-                .HandleDestroyed(handleId);
+            try
+            {
+                var hr = ComInterfaceDispatch
+                    .GetInstance<ICorProfilerCallback2>((ComInterfaceDispatch*)_this)
+                    .HandleCreated(handleId, initialObjectId);
 
-            return hr;
+                return hr;
+            }
+            catch (Exception ex)
+            {
+                return ex.HResult;
+            }
         }
-        catch (Exception ex)
+
+        [UnmanagedCallersOnly]
+        public static unsafe int HandleDestroyed(IntPtr _this, ulong handleId)
         {
-            return ex.HResult;
+            try
+            {
+                var hr = ComInterfaceDispatch
+                    .GetInstance<ICorProfilerCallback2>((ComInterfaceDispatch*)_this)
+                    .HandleDestroyed(handleId);
+
+                return hr;
+            }
+            catch (Exception ex)
+            {
+                return ex.HResult;
+            }
         }
     }
 }
