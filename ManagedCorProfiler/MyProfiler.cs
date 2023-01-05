@@ -98,13 +98,13 @@ namespace ManagedCorProfiler
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
         private static void LeaveStub(ulong functionId, ulong clientData, ulong func, COR_PRF_FUNCTION_ARGUMENT_RANGE* f)
         {
-            Console.WriteLine("LEAVE");
+            //Console.WriteLine("LEAVE");
         }
 
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
         private static void TailcallStub(ulong functionId, ulong clientData, ulong frameInfo)
         {
-            Console.WriteLine("TAILCALL");
+            //Console.WriteLine("TAILCALL");
         }
 
         #region EnterLeaveHooks

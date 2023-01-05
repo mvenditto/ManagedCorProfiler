@@ -163,8 +163,7 @@ namespace ManagedCorProfiler.ComInterop.Wrappers
             vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, uint, ulong*, COR_PRF_GC_ROOT_KIND*, COR_PRF_GC_ROOT_FLAGS*, ulong*, int>)&ICorProfilerCallback2ManagedWrapper.RootReferences2;
             vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, ulong, int>)&ICorProfilerCallback2ManagedWrapper.HandleCreated;
             vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int>)&ICorProfilerCallback2ManagedWrapper.HandleDestroyed;
-
-            Debug.Assert(VtblCount == idx + 8);
+            Debug.Assert(VtblCount == idx);
         }
     }
 }

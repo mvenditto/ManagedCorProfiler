@@ -3,6 +3,7 @@ using ManagedCorProfiler.ComInterop.Interfaces;
 using ManagedCorProfiler.Utilities;
 using System.Collections;
 using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -11,16 +12,29 @@ namespace ManagedCorProfiler.ComInterop.Wrappers
     internal unsafe class CorProfilerComWrappers : ComWrappers
     {
         /* ICorProfilerCallback Vtable */
-        static readonly IntPtr s_ICorProfilerCallbackVtbl;
-        static readonly IntPtr s_ICorProfilerCallback2Vtbl;
+        //static readonly IntPtr s_ICorProfilerCallbackVtbl;
+        //static readonly IntPtr s_ICorProfilerCallback2Vtbl;
 
-        static readonly ComInterfaceEntry* s_CorProfilerImplDefinition;
-        static readonly int s_CorProfilerImplDefinitionLen;
+        //static readonly ComInterfaceEntry* s_CorProfilerImplDefinition;
+        //static readonly int s_CorProfilerImplDefinitionLen;
 
+        private static void InitIUnknownVtbl(IntPtr* vtable)
+        {
+            // Get system provided IUnknown implementation.
+            GetIUnknownImpl(
+                out IntPtr fpQueryInterface,
+                out IntPtr fpAddRef,
+                out IntPtr fpRelease);
+
+            // IUnknown
+            vtable[0] = fpQueryInterface;
+            vtable[1] = fpAddRef;
+            vtable[2] = fpRelease;
+        }
+
+        /*
         static CorProfilerComWrappers()
         {
-            Console.WriteLine("CorProfilerComWrappers");
-
             // Get system provided IUnknown implementation.
             GetIUnknownImpl(
                 out IntPtr fpQueryInterface,
@@ -235,7 +249,7 @@ namespace ManagedCorProfiler.ComInterop.Wrappers
                 Debug.Assert(s_CorProfilerImplDefinitionLen == idx);
                 s_CorProfilerImplDefinition = entries;
             }
-        }
+        }*/
 
         readonly delegate*<IntPtr, object?> _createIfSupported;
 
@@ -244,11 +258,108 @@ namespace ManagedCorProfiler.ComInterop.Wrappers
             _createIfSupported = &CorProfilerDynamicWrapper.CreateIfSupported;
         }
 
+        private class VtableDef
+        {
+            public uint VtableCount;
+            
+            public delegate* managed<IntPtr*, void> InitVtable;
+
+            public Guid IID;
+            
+            public VtableDef(uint count, delegate* managed<IntPtr*, void> initVtable, Guid iid)
+            {
+                VtableCount = count;
+                InitVtable = initVtable;
+                IID = iid;
+            }
+        }
+
+        private static readonly Dictionary<Type, VtableDef> _ifaceVtblTypeMap = new()
+        {
+            { typeof(Interfaces.ICorProfilerCallback), new(
+                ICorProfilerCallbackManagedWrapper.VtblCount, 
+                &ICorProfilerCallbackManagedWrapper.InitVtable,
+                CorProfConsts.IID_ICorProfilerCallback) },
+            { typeof(Interfaces.ICorProfilerCallback2), new(
+                ICorProfilerCallback2ManagedWrapper.VtblCount,
+                &ICorProfilerCallback2ManagedWrapper.InitVtable,
+                CorProfConsts.IID_ICorProfilerCallback2) },
+            { typeof(Interfaces.ICorProfilerCallback3), new(
+                ICorProfilerCallback3ManagedWrapper.VtblCount,
+                &ICorProfilerCallback3ManagedWrapper.InitVtable,
+                CorProfConsts.IID_ICorProfilerCallback3) },
+            { typeof(Interfaces.ICorProfilerCallback4), new(
+                ICorProfilerCallback4ManagedWrapper.VtblCount,
+                &ICorProfilerCallback4ManagedWrapper.InitVtable,
+                CorProfConsts.IID_ICorProfilerCallback4) },
+            { typeof(Interfaces.ICorProfilerCallback5), new(
+                ICorProfilerCallback5ManagedWrapper.VtblCount,
+                &ICorProfilerCallback5ManagedWrapper.InitVtable,
+                CorProfConsts.IID_ICorProfilerCallback5) },
+            { typeof(Interfaces.ICorProfilerCallback6), new(
+                ICorProfilerCallback6ManagedWrapper.VtblCount,
+                &ICorProfilerCallback6ManagedWrapper.InitVtable,
+                CorProfConsts.IID_ICorProfilerCallback6) },
+            { typeof(Interfaces.ICorProfilerCallback7), new(
+                ICorProfilerCallback7ManagedWrapper.VtblCount,
+                &ICorProfilerCallback7ManagedWrapper.InitVtable,
+                CorProfConsts.IID_ICorProfilerCallback7) },
+            { typeof(Interfaces.ICorProfilerCallback8), new(
+                ICorProfilerCallback8ManagedWrapper.VtblCount,
+                &ICorProfilerCallback8ManagedWrapper.InitVtable,
+                CorProfConsts.IID_ICorProfilerCallback8) },
+            { typeof(Interfaces.ICorProfilerCallback9), new(
+                ICorProfilerCallback9ManagedWrapper.VtblCount,
+                &ICorProfilerCallback9ManagedWrapper.InitVtable,
+                CorProfConsts.IID_ICorProfilerCallback9) },
+        };
+
         protected override unsafe ComInterfaceEntry* ComputeVtables(object obj, CreateComInterfaceFlags flags, out int count)
         {
             Debug.Assert(flags is CreateComInterfaceFlags.None);
-            count = s_CorProfilerImplDefinitionLen;
-            return s_CorProfilerImplDefinition;
+
+            var profilerCallbackIfaces = obj
+                .GetType()
+                .GetInterfaces()
+                .Where(x => x.Name.StartsWith("ICorProfilerCallback"))
+                .ToList();
+
+            if (!profilerCallbackIfaces.Any())
+            {
+                throw new ArgumentException();
+            }
+
+            var implDefinitionLen = profilerCallbackIfaces.Count();
+                
+            Console.WriteLine($"IFACE {implDefinitionLen} {profilerCallbackIfaces.Last()}");
+
+            var implDef = (ComInterfaceEntry*)RuntimeHelpers.AllocateTypeAssociatedMemory(
+                    typeof(CorProfilerComWrappers),
+                    sizeof(ComInterfaceEntry) * implDefinitionLen);
+
+            var idx = 0;
+
+            for (var i = 0; i < profilerCallbackIfaces.Count(); i++)
+            {
+                var iface = profilerCallbackIfaces[i];
+
+                var vtblInitializer = _ifaceVtblTypeMap[iface];
+
+                var vtable = (IntPtr*)RuntimeHelpers.AllocateTypeAssociatedMemory(
+                        typeof(CorProfilerComWrappers),
+                        (int)(IntPtr.Size * vtblInitializer.VtableCount));
+
+                InitIUnknownVtbl(vtable);
+                vtblInitializer.InitVtable(vtable);
+
+                implDef[idx].IID = vtblInitializer.IID;
+                implDef[idx++].Vtable = (nint)vtable;
+
+            }
+            
+            count = implDefinitionLen;
+
+            return implDef;
         }
 
         protected override object? CreateObject(nint externalComObject, CreateObjectFlags flags)

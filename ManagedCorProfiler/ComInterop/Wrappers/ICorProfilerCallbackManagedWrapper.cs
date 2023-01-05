@@ -1309,7 +1309,7 @@ namespace ManagedCorProfiler.ComInterop.Wrappers
             vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, int>)&ICorProfilerCallbackManagedWrapper.ExceptionCLRCatcherFound;
             vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, int>)&ICorProfilerCallbackManagedWrapper.ExceptionCLRCatcherExecute;
 
-            Debug.Assert(VtblCount == idx + 3);
+            Debug.Assert(VtblCount == idx);
         }
     }
 }
