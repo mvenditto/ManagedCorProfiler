@@ -55,5 +55,17 @@ namespace ManagedCorProfiler.ComInterop.Wrappers
                 return ex.HResult;
             }
         }
+
+        public readonly static uint VtblCount = 83;
+        public static void InitVtable(IntPtr* vtable)
+        {
+
+            ICorProfilerCallbackManagedWrapper.InitVtable(vtable);
+            ICorProfilerCallback2ManagedWrapper.InitVtable(vtable);
+
+            vtable[80] = (IntPtr)(delegate* unmanaged<IntPtr, IUnknown*, void*, uint, int>)&InitializeForAttach;
+            vtable[81] = (IntPtr)(delegate* unmanaged<IntPtr, int>)&ProfilerAttachComplete;
+            vtable[82] = (IntPtr)(delegate* unmanaged<IntPtr, int>)&ProfilerDetachSucceeded;
+        }
     }
 }

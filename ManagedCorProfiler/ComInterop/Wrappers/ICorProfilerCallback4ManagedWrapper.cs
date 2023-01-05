@@ -23,6 +23,7 @@ namespace ManagedCorProfiler.ComInterop.Wrappers
                 return ex.HResult;
             }
         }
+
         [UnmanagedCallersOnly]
         public static unsafe int GetReJITParameters(IntPtr _this, ulong moduleId, uint methodId, ICorProfilerFunctionControl* pFunctionControl)
         {
@@ -39,6 +40,7 @@ namespace ManagedCorProfiler.ComInterop.Wrappers
                 return ex.HResult;
             }
         }
+
         [UnmanagedCallersOnly]
         public static unsafe int ReJITCompilationFinished(IntPtr _this, ulong functionId, ulong rejitId, int hrStatus, int fIsSafeToBlock)
         {
@@ -55,6 +57,7 @@ namespace ManagedCorProfiler.ComInterop.Wrappers
                 return ex.HResult;
             }
         }
+
         [UnmanagedCallersOnly]
         public static unsafe int ReJITError(IntPtr _this, ulong moduleId, uint methodId, ulong functionId, int hrStatus)
         {
@@ -71,6 +74,7 @@ namespace ManagedCorProfiler.ComInterop.Wrappers
                 return ex.HResult;
             }
         }
+
         [UnmanagedCallersOnly]
         public static unsafe int MovedReferences2(IntPtr _this, uint cMovedObjectIDRanges, ulong* oldObjectIDRangeStart, ulong* newObjectIDRangeStart, ulong* cObjectIDRangeLength)
         {
@@ -87,6 +91,7 @@ namespace ManagedCorProfiler.ComInterop.Wrappers
                 return ex.HResult;
             }
         }
+
         [UnmanagedCallersOnly]
         public static unsafe int SurvivingReferences2(IntPtr _this, uint cSurvivingObjectIDRanges, ulong* objectIDRangeStart, ulong* cObjectIDRangeLength)
         {
@@ -102,6 +107,23 @@ namespace ManagedCorProfiler.ComInterop.Wrappers
             {
                 return ex.HResult;
             }
+        }
+
+        public readonly static uint VtblCount = 89;
+
+        public static void InitVtable(IntPtr* vtable)
+        {
+
+            ICorProfilerCallbackManagedWrapper.InitVtable(vtable);
+            ICorProfilerCallback2ManagedWrapper.InitVtable(vtable);
+            ICorProfilerCallback3ManagedWrapper.InitVtable(vtable);
+
+            vtable[83] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, ulong, int, int>)&ReJITCompilationStarted;
+            vtable[84] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, uint, ICorProfilerFunctionControl*, int>)&GetReJITParameters;
+            vtable[85] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, ulong, int, int, int>)&ReJITCompilationFinished;
+            vtable[86] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, uint, ulong, int, int>)&ReJITError;
+            vtable[87] = (IntPtr)(delegate* unmanaged<IntPtr, uint, ulong*, ulong*, ulong*, int>)&MovedReferences2;
+            vtable[88] = (IntPtr)(delegate* unmanaged<IntPtr, uint, ulong*, ulong*, int>)&SurvivingReferences2;
         }
     }
 }

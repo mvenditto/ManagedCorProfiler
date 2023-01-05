@@ -1,4 +1,5 @@
 using CorProf.Bindings;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using static System.Runtime.InteropServices.ComWrappers;
 using ICorProfilerCallback = ManagedCorProfiler.ComInterop.Interfaces.ICorProfilerCallback;
@@ -1230,6 +1231,85 @@ namespace ManagedCorProfiler.ComInterop.Wrappers
             {
                 return ex.HResult;
             }
+        }
+
+        public readonly static uint VtblCount = 3 + 69;
+
+        public static void InitVtable(IntPtr* vtable)
+        {
+            var idx = 3;
+
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, IUnknown*, int>)&ICorProfilerCallbackManagedWrapper.Initialize;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, int>)&ICorProfilerCallbackManagedWrapper.Shutdown;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int>)&ICorProfilerCallbackManagedWrapper.AppDomainCreationStarted;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int, int>)&ICorProfilerCallbackManagedWrapper.AppDomainCreationFinished;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int>)&ICorProfilerCallbackManagedWrapper.AppDomainShutdownStarted;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int, int>)&ICorProfilerCallbackManagedWrapper.AppDomainShutdownFinished;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int>)&ICorProfilerCallbackManagedWrapper.AssemblyLoadStarted;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int, int>)&ICorProfilerCallbackManagedWrapper.AssemblyLoadFinished;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int>)&ICorProfilerCallbackManagedWrapper.AssemblyUnloadStarted;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int, int>)&ICorProfilerCallbackManagedWrapper.AssemblyUnloadFinished;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int>)&ICorProfilerCallbackManagedWrapper.ModuleLoadStarted;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int, int>)&ICorProfilerCallbackManagedWrapper.ModuleLoadFinished;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int>)&ICorProfilerCallbackManagedWrapper.ModuleUnloadStarted;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int, int>)&ICorProfilerCallbackManagedWrapper.ModuleUnloadFinished;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, ulong, int>)&ICorProfilerCallbackManagedWrapper.ModuleAttachedToAssembly;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int>)&ICorProfilerCallbackManagedWrapper.ClassLoadStarted;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int, int>)&ICorProfilerCallbackManagedWrapper.ClassLoadFinished;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int>)&ICorProfilerCallbackManagedWrapper.ClassUnloadStarted;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int, int>)&ICorProfilerCallbackManagedWrapper.ClassUnloadFinished;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int>)&ICorProfilerCallbackManagedWrapper.FunctionUnloadStarted;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int, int>)&ICorProfilerCallbackManagedWrapper.JITCompilationStarted;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int, int, int>)&ICorProfilerCallbackManagedWrapper.JITCompilationFinished;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int*, int>)&ICorProfilerCallbackManagedWrapper.JITCachedFunctionSearchStarted;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, COR_PRF_JIT_CACHE, int>)&ICorProfilerCallbackManagedWrapper.JITCachedFunctionSearchFinished;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int>)&ICorProfilerCallbackManagedWrapper.JITFunctionPitched;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, ulong, int*, int>)&ICorProfilerCallbackManagedWrapper.JITInlining;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int>)&ICorProfilerCallbackManagedWrapper.ThreadCreated;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int>)&ICorProfilerCallbackManagedWrapper.ThreadDestroyed;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, uint, int>)&ICorProfilerCallbackManagedWrapper.ThreadAssignedToOSThread;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, int>)&ICorProfilerCallbackManagedWrapper.RemotingClientInvocationStarted;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, Guid*, int, int>)&ICorProfilerCallbackManagedWrapper.RemotingClientSendingMessage;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, Guid*, int, int>)&ICorProfilerCallbackManagedWrapper.RemotingClientReceivingReply;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, int>)&ICorProfilerCallbackManagedWrapper.RemotingClientInvocationFinished;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, Guid*, int, int>)&ICorProfilerCallbackManagedWrapper.RemotingServerReceivingMessage;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, int>)&ICorProfilerCallbackManagedWrapper.RemotingServerInvocationStarted;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, int>)&ICorProfilerCallbackManagedWrapper.RemotingServerInvocationReturned;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, Guid*, int, int>)&ICorProfilerCallbackManagedWrapper.RemotingServerSendingReply;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, COR_PRF_TRANSITION_REASON, int>)&ICorProfilerCallbackManagedWrapper.UnmanagedToManagedTransition;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, COR_PRF_TRANSITION_REASON, int>)&ICorProfilerCallbackManagedWrapper.ManagedToUnmanagedTransition;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, COR_PRF_SUSPEND_REASON, int>)&ICorProfilerCallbackManagedWrapper.RuntimeSuspendStarted;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, int>)&ICorProfilerCallbackManagedWrapper.RuntimeSuspendFinished;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, int>)&ICorProfilerCallbackManagedWrapper.RuntimeSuspendAborted;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, int>)&ICorProfilerCallbackManagedWrapper.RuntimeResumeStarted;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, int>)&ICorProfilerCallbackManagedWrapper.RuntimeResumeFinished;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int>)&ICorProfilerCallbackManagedWrapper.RuntimeThreadSuspended;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int>)&ICorProfilerCallbackManagedWrapper.RuntimeThreadResumed;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, uint, ulong*, ulong*, uint*, int>)&ICorProfilerCallbackManagedWrapper.MovedReferences;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, ulong, int>)&ICorProfilerCallbackManagedWrapper.ObjectAllocated;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, uint, ulong*, uint*, int>)&ICorProfilerCallbackManagedWrapper.ObjectsAllocatedByClass;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, ulong, uint, ulong*, int>)&ICorProfilerCallbackManagedWrapper.ObjectReferences;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, uint, ulong*, int>)&ICorProfilerCallbackManagedWrapper.RootReferences;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int>)&ICorProfilerCallbackManagedWrapper.ExceptionThrown;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int>)&ICorProfilerCallbackManagedWrapper.ExceptionSearchFunctionEnter;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, int>)&ICorProfilerCallbackManagedWrapper.ExceptionSearchFunctionLeave;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int>)&ICorProfilerCallbackManagedWrapper.ExceptionSearchFilterEnter;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, int>)&ICorProfilerCallbackManagedWrapper.ExceptionSearchFilterLeave;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int>)&ICorProfilerCallbackManagedWrapper.ExceptionSearchCatcherFound;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int>)&ICorProfilerCallbackManagedWrapper.ExceptionOSHandlerEnter;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int>)&ICorProfilerCallbackManagedWrapper.ExceptionOSHandlerLeave;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int>)&ICorProfilerCallbackManagedWrapper.ExceptionUnwindFunctionEnter;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, int>)&ICorProfilerCallbackManagedWrapper.ExceptionUnwindFunctionLeave;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int>)&ICorProfilerCallbackManagedWrapper.ExceptionUnwindFinallyEnter;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, int>)&ICorProfilerCallbackManagedWrapper.ExceptionUnwindFinallyLeave;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, ulong, int>)&ICorProfilerCallbackManagedWrapper.ExceptionCatcherEnter;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, int>)&ICorProfilerCallbackManagedWrapper.ExceptionCatcherLeave;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, Guid*, void*, uint, int>)&ICorProfilerCallbackManagedWrapper.COMClassicVTableCreated;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, Guid*, void*, int>)&ICorProfilerCallbackManagedWrapper.COMClassicVTableDestroyed;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, int>)&ICorProfilerCallbackManagedWrapper.ExceptionCLRCatcherFound;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, int>)&ICorProfilerCallbackManagedWrapper.ExceptionCLRCatcherExecute;
+
+            Debug.Assert(VtblCount == idx + 3);
         }
     }
 }

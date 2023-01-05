@@ -23,6 +23,7 @@ namespace ManagedCorProfiler.ComInterop.Wrappers
                 return ex.HResult;
             }
         }
+
         [UnmanagedCallersOnly]
         public static unsafe int DynamicMethodJITCompilationFinished(IntPtr _this, ulong functionId, int hrStatus, int fIsSafeToBlock)
         {
@@ -38,6 +39,23 @@ namespace ManagedCorProfiler.ComInterop.Wrappers
             {
                 return ex.HResult;
             }
+        }
+
+
+        public readonly static uint VtblCount = 94;
+        public static void InitVtable(IntPtr* vtable)
+        {
+
+            ICorProfilerCallbackManagedWrapper.InitVtable(vtable);
+            ICorProfilerCallback2ManagedWrapper.InitVtable(vtable);
+            ICorProfilerCallback3ManagedWrapper.InitVtable(vtable);
+            ICorProfilerCallback4ManagedWrapper.InitVtable(vtable);
+            ICorProfilerCallback5ManagedWrapper.InitVtable(vtable);
+            ICorProfilerCallback6ManagedWrapper.InitVtable(vtable);
+            ICorProfilerCallback7ManagedWrapper.InitVtable(vtable);
+
+            vtable[92] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int, byte*, uint, int>)&DynamicMethodJITCompilationStarted;
+            vtable[93] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int, int, int>)&DynamicMethodJITCompilationFinished;
         }
     }
 }

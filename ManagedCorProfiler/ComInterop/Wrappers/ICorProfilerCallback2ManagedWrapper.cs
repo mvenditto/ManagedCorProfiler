@@ -1,4 +1,5 @@
 using CorProf.Bindings;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using static System.Runtime.InteropServices.ComWrappers;
 using ICorProfilerCallback2 = ManagedCorProfiler.ComInterop.Interfaces.ICorProfilerCallback2;
@@ -142,6 +143,28 @@ namespace ManagedCorProfiler.ComInterop.Wrappers
             {
                 return ex.HResult;
             }
+        }
+
+        public readonly static uint VtblCount = /* ICorProfilerCallback */ 69 + 
+            /* IUnknown */ 3 
+            + 8;
+
+        public static void InitVtable(IntPtr* vtable)
+        {
+            ICorProfilerCallbackManagedWrapper.InitVtable(vtable);
+
+            var idx = ICorProfilerCallbackManagedWrapper.VtblCount;
+
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, uint, ushort*, int>)&ICorProfilerCallback2ManagedWrapper.ThreadNameChanged;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, int, int*, COR_PRF_GC_REASON, int>)&ICorProfilerCallback2ManagedWrapper.GarbageCollectionStarted;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, uint, ulong*, uint*, int>)&ICorProfilerCallback2ManagedWrapper.SurvivingReferences;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, int>)&ICorProfilerCallback2ManagedWrapper.GarbageCollectionFinished;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, uint, ulong, int>)&ICorProfilerCallback2ManagedWrapper.FinalizeableObjectQueued;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, uint, ulong*, COR_PRF_GC_ROOT_KIND*, COR_PRF_GC_ROOT_FLAGS*, ulong*, int>)&ICorProfilerCallback2ManagedWrapper.RootReferences2;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, ulong, int>)&ICorProfilerCallback2ManagedWrapper.HandleCreated;
+            vtable[idx++] = (IntPtr)(delegate* unmanaged<IntPtr, ulong, int>)&ICorProfilerCallback2ManagedWrapper.HandleDestroyed;
+
+            Debug.Assert(VtblCount == idx + 8);
         }
     }
 }
