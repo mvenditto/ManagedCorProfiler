@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33122.133
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CorProf.Core", "ManagedCorProfiler\CorProf.Core.csproj", "{EF302537-E1D4-4DD5-9F3F-80A52D5F8172}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CorProf.Core", "CorProf.Core\CorProf.Core.csproj", "{EF302537-E1D4-4DD5-9F3F-80A52D5F8172}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleApp", "SampleApp\SampleApp.csproj", "{D8F7AE99-3F9D-44DD-B23F-5E3625EFC304}"
 EndProject
