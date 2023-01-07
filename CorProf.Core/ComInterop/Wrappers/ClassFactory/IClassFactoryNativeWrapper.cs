@@ -1,7 +1,7 @@
 ﻿using Microsoft.Diagnostics.Runtime.Utilities;
 using System.Runtime.InteropServices;
 
-namespace ManagedCorProfiler.ComInterop.Wrappers
+namespace CorProf.ComInterop.Wrappers
 {
     /// <summary>
     /// managed --> native

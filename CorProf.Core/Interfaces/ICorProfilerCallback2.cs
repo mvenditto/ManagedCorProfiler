@@ -1,5 +1,5 @@
 using CorProf.Bindings;
-using ManagedCorProfiler.Utilities;
+using CorProf.Utilities;
 using Microsoft.Diagnostics.Runtime.Utilities;
 
 namespace CorProf.Core.Interfaces

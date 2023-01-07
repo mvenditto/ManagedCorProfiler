@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace ManagedCorProfiler.ComInterop.Wrappers
+namespace CorProf.ComInterop.Wrappers
 {
     public sealed unsafe class ClassFactoryComWrappers : ComWrappers
     {

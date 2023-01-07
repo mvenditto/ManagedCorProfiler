@@ -1,12 +1,12 @@
 ﻿using CorProf.Bindings;
-using ManagedCorProfiler.Utilities;
+using CorProf.Utilities;
 using System.Collections;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace ManagedCorProfiler.ComInterop.Wrappers
+namespace CorProf.ComInterop.Wrappers
 {
     internal unsafe class CorProfilerComWrappers : ComWrappers
     {

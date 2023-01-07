@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using static System.Runtime.InteropServices.ComWrappers;
 using ICorProfilerCallback = CorProf.Core.Interfaces.ICorProfilerCallback;
 
-namespace ManagedCorProfiler.ComInterop.Wrappers
+namespace CorProf.ComInterop.Wrappers
 {
     static unsafe class ICorProfilerCallbackManagedWrapper
     {

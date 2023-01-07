@@ -1,15 +1,17 @@
-﻿using CorProf.Bindings;
-using ManagedCorProfiler.ComInterop.Wrappers;
-using ManagedCorProfiler.Utilities;
-using Microsoft.Diagnostics.Runtime.Utilities;
+﻿using Microsoft.Diagnostics.Runtime.Utilities;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+
+using CorProf.Bindings;
+using CorProf.Core;
+using CorProf.Utilities;
+
 using ICorProfilerCallback = CorProf.Core.Interfaces.ICorProfilerCallback;
 using ICorProfilerCallback2 = CorProf.Core.Interfaces.ICorProfilerCallback2;
 
 
-// [ProfilerCallback("cf0d821e-299b-5307-a3d8-b283c03916dd")]
+[ProfilerCallback("cf0d821e-299b-5307-a3d8-b283c03916dd")]
 internal unsafe class MyProfiler : ICorProfilerCallback2
 {
     private ICorProfilerInfo2* _profilerInfo;

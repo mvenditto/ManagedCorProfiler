@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CorProf.Shared", "CorProf.S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyProfiler", "MyProfiler\MyProfiler.csproj", "{F14A3C6D-4F03-48CF-A3F4-BACF87DC97F2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CorProf.Generator", "CorProf.Generator\CorProf.Generator.csproj", "{A384B3AC-AC08-40DB-B6D9-BEE852B7F385}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{F14A3C6D-4F03-48CF-A3F4-BACF87DC97F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F14A3C6D-4F03-48CF-A3F4-BACF87DC97F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F14A3C6D-4F03-48CF-A3F4-BACF87DC97F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A384B3AC-AC08-40DB-B6D9-BEE852B7F385}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A384B3AC-AC08-40DB-B6D9-BEE852B7F385}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A384B3AC-AC08-40DB-B6D9-BEE852B7F385}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A384B3AC-AC08-40DB-B6D9-BEE852B7F385}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

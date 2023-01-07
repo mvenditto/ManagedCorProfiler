@@ -1,4 +1,4 @@
-﻿namespace ManagedCorProfiler.ComInterop.Wrappers
+﻿namespace CorProf.ComInterop.Wrappers
 {
     public interface IClassFactory
     {

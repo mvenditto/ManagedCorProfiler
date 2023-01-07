@@ -1,22 +1,18 @@
 ﻿using CorProf.Bindings;
 using CorProf.Shared;
-using ManagedCorProfiler.ComInterop.Wrappers;
-using ManagedCorProfiler.Utilities;
+using CorProf.ComInterop.Wrappers;
 using Microsoft.Diagnostics.Runtime.Utilities;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using CorProf.Utilities;
 
-namespace ManagedCorProfiler
+namespace CorProf
 {
     public static class DllEntryPointExports
     {
         [UnmanagedCallersOnly(EntryPoint = "DllGetClassObject")]
         public static unsafe int DllGetClassObject(Guid* rclsid, Guid* riid, IntPtr* ppv)
         {
-            Console.WriteLine("DllGetClassObject()");
-            Console.WriteLine($"\tRCLSID = {*rclsid}");
-            Console.WriteLine($"\tRIID   = {*riid}");
-
             var guid = *riid;
 
             if (guid == Guids.IID_IUnknown
@@ -25,7 +21,7 @@ namespace ManagedCorProfiler
 
                 var cw = new ClassFactoryComWrappers();
 
-                var classFactory = new DefaultClassFactory(new MyProfiler());
+                var classFactory = new DefaultClassFactory(new {{ profiler_type_name }}());
 
                 IntPtr ccwUnknown = cw.GetOrCreateComInterfaceForObject(
                     classFactory,
@@ -54,8 +50,6 @@ namespace ManagedCorProfiler
         public static unsafe int DllMain(IntPtr hModule, int fwReason, IntPtr reserved)
         {
             var reason = (DllMainCallReason)fwReason;
-
-            Console.WriteLine($"DllMain(reason={reason})");
 
             switch (reason)
             {

@@ -1,4 +1,4 @@
-﻿namespace ManagedCorProfiler.Utilities
+﻿namespace CorProf.Utilities
 {
     public static class Bool
     {

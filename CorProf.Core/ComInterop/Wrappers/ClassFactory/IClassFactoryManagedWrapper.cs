@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using static System.Runtime.InteropServices.ComWrappers;
 
-namespace ManagedCorProfiler.ComInterop.Wrappers
+namespace CorProf.ComInterop.Wrappers
 {
     /// <summary>
     /// native --> managed
