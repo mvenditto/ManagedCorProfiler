@@ -1,7 +1,7 @@
 using CorProf.Bindings;
 using Microsoft.Diagnostics.Runtime.Utilities;
 
-namespace ManagedCorProfiler.ComInterop.Interfaces
+namespace CorProf.Core.Interfaces
 {
     public unsafe interface ICorProfilerCallback
     {

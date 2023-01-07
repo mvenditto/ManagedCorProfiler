@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 using static System.Runtime.InteropServices.ComWrappers;
-using ICorProfilerCallback5 = ManagedCorProfiler.ComInterop.Interfaces.ICorProfilerCallback5;
+using ICorProfilerCallback5 = CorProf.Core.Interfaces.ICorProfilerCallback5;
 
 namespace ManagedCorProfiler.ComInterop.Wrappers
 {

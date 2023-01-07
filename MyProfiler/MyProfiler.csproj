@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PublishAot>true</PublishAot>
+  </PropertyGroup>
+
+  <!-- https://github.com/dotnet/runtimelab/issues/976
+    <ItemGroup>
+      <DirectPInvoke Include="kernel32" />
+    </ItemGroup>
+  -->
+
+  <ItemGroup>
+    <ProjectReference Include="..\ManagedCorProfiler\CorProf.Core.csproj" />
+  </ItemGroup>
+
+</Project>

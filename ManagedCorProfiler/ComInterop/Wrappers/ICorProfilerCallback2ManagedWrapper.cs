@@ -2,7 +2,7 @@ using CorProf.Bindings;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using static System.Runtime.InteropServices.ComWrappers;
-using ICorProfilerCallback2 = ManagedCorProfiler.ComInterop.Interfaces.ICorProfilerCallback2;
+using ICorProfilerCallback2 = CorProf.Core.Interfaces.ICorProfilerCallback2;
 
 namespace ManagedCorProfiler.ComInterop.Wrappers
 {

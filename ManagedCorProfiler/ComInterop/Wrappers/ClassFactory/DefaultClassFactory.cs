@@ -4,8 +4,15 @@ using System.Runtime.InteropServices;
 
 namespace ManagedCorProfiler.ComInterop.Wrappers
 {
-    public class ClassFactoryImpl : IClassFactory
+    public class DefaultClassFactory : IClassFactory
     {
+        private readonly object _profiler;
+
+        public DefaultClassFactory(object profilerInstance)
+        {
+            _profiler = profilerInstance;
+        }
+
         public unsafe int CreateInstance(nint outer, Guid* guid, nint* instance)
         {
             if (outer != IntPtr.Zero)
@@ -15,11 +22,11 @@ namespace ManagedCorProfiler.ComInterop.Wrappers
             }
 
             var guid_ = *guid;
+
             var cw = new CorProfilerComWrappers();
-            var profiler = new MyProfiler();
 
             IntPtr ccwUnknown = cw.GetOrCreateComInterfaceForObject(
-                    profiler,
+                    _profiler,
                     CreateComInterfaceFlags.None);
 
             var hr = Marshal.QueryInterface(ccwUnknown, ref guid_, out var ptr);

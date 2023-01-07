@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace ManagedCorProfiler.ComInterop.Wrappers
 {
-    sealed unsafe class ClassFactoryComWrappers : ComWrappers
+    public sealed unsafe class ClassFactoryComWrappers : ComWrappers
     {
         /* function pointers to be called by the native side */
         static readonly IntPtr s_ClassFactoryCreateInstanceVtbl;
@@ -79,7 +79,7 @@ namespace ManagedCorProfiler.ComInterop.Wrappers
         {
             Debug.Assert(flags is CreateComInterfaceFlags.None);
 
-            if (obj is ClassFactoryImpl)
+            if (obj is DefaultClassFactory)
             {
                 count = s_ClassFactoryImplDefinitionLen;
                 return s_ClassFactoryImplDefinition;

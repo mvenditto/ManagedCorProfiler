@@ -1,5 +1,4 @@
 ﻿using CorProf.Bindings;
-using ManagedCorProfiler.ComInterop.Interfaces;
 using Microsoft.Diagnostics.Runtime.Utilities;
 using System.Runtime.InteropServices;
 

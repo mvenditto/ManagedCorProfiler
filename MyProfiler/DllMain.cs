@@ -1,13 +1,14 @@
-﻿using Microsoft.Diagnostics.Runtime.Utilities;
-using System.Runtime.InteropServices;
-using ManagedCorProfiler.Utilities;
+﻿using CorProf.Bindings;
+using CorProf.Shared;
 using ManagedCorProfiler.ComInterop.Wrappers;
+using ManagedCorProfiler.Utilities;
+using Microsoft.Diagnostics.Runtime.Utilities;
 using System.Diagnostics;
-using CorProf.Bindings;
+using System.Runtime.InteropServices;
 
 namespace ManagedCorProfiler
 {
-    public static class DllMainExports
+    public static class DllEntryPointExports
     {
         [UnmanagedCallersOnly(EntryPoint = "DllGetClassObject")]
         public static unsafe int DllGetClassObject(Guid* rclsid, Guid* riid, IntPtr* ppv)
@@ -23,7 +24,8 @@ namespace ManagedCorProfiler
             {
 
                 var cw = new ClassFactoryComWrappers();
-                var classFactory = new ClassFactoryImpl();
+
+                var classFactory = new DefaultClassFactory(new MyProfiler());
 
                 IntPtr ccwUnknown = cw.GetOrCreateComInterfaceForObject(
                     classFactory,
@@ -48,16 +50,8 @@ namespace ManagedCorProfiler
             return HResult.S_OK;
         }
 
-        private enum DllMainCallReason
-        {
-            DLL_PROCESS_DETACH = 0,
-            DLL_PROCESS_ATTACH = 1,
-            DLL_THREAD_ATTACH = 2,
-            DLL_THREAD_DETACH = 3
-        }
-
         [UnmanagedCallersOnly(EntryPoint = "DllMain")]
-        public static unsafe int DllMain(IntPtr hModule, int fwReason, IntPtr reserved) 
+        public static unsafe int DllMain(IntPtr hModule, int fwReason, IntPtr reserved)
         {
             var reason = (DllMainCallReason)fwReason;
 

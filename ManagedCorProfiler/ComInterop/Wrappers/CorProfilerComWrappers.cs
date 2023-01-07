@@ -1,5 +1,4 @@
 ﻿using CorProf.Bindings;
-using ManagedCorProfiler.ComInterop.Interfaces;
 using ManagedCorProfiler.Utilities;
 using System.Collections;
 using System.Diagnostics;
@@ -276,39 +275,39 @@ namespace ManagedCorProfiler.ComInterop.Wrappers
 
         private static readonly Dictionary<Type, VtableDef> _ifaceVtblTypeMap = new()
         {
-            { typeof(Interfaces.ICorProfilerCallback), new(
+            { typeof(CorProf.Core.Interfaces.ICorProfilerCallback), new(
                 ICorProfilerCallbackManagedWrapper.VtblCount, 
                 &ICorProfilerCallbackManagedWrapper.InitVtable,
                 CorProfConsts.IID_ICorProfilerCallback) },
-            { typeof(Interfaces.ICorProfilerCallback2), new(
+            { typeof(CorProf.Core.Interfaces.ICorProfilerCallback2), new(
                 ICorProfilerCallback2ManagedWrapper.VtblCount,
                 &ICorProfilerCallback2ManagedWrapper.InitVtable,
                 CorProfConsts.IID_ICorProfilerCallback2) },
-            { typeof(Interfaces.ICorProfilerCallback3), new(
+            { typeof(CorProf.Core.Interfaces.ICorProfilerCallback3), new(
                 ICorProfilerCallback3ManagedWrapper.VtblCount,
                 &ICorProfilerCallback3ManagedWrapper.InitVtable,
                 CorProfConsts.IID_ICorProfilerCallback3) },
-            { typeof(Interfaces.ICorProfilerCallback4), new(
+            { typeof(CorProf.Core.Interfaces.ICorProfilerCallback4), new(
                 ICorProfilerCallback4ManagedWrapper.VtblCount,
                 &ICorProfilerCallback4ManagedWrapper.InitVtable,
                 CorProfConsts.IID_ICorProfilerCallback4) },
-            { typeof(Interfaces.ICorProfilerCallback5), new(
+            { typeof(CorProf.Core.Interfaces.ICorProfilerCallback5), new(
                 ICorProfilerCallback5ManagedWrapper.VtblCount,
                 &ICorProfilerCallback5ManagedWrapper.InitVtable,
                 CorProfConsts.IID_ICorProfilerCallback5) },
-            { typeof(Interfaces.ICorProfilerCallback6), new(
+            { typeof(CorProf.Core.Interfaces.ICorProfilerCallback6), new(
                 ICorProfilerCallback6ManagedWrapper.VtblCount,
                 &ICorProfilerCallback6ManagedWrapper.InitVtable,
                 CorProfConsts.IID_ICorProfilerCallback6) },
-            { typeof(Interfaces.ICorProfilerCallback7), new(
+            { typeof(CorProf.Core.Interfaces.ICorProfilerCallback7), new(
                 ICorProfilerCallback7ManagedWrapper.VtblCount,
                 &ICorProfilerCallback7ManagedWrapper.InitVtable,
                 CorProfConsts.IID_ICorProfilerCallback7) },
-            { typeof(Interfaces.ICorProfilerCallback8), new(
+            { typeof(CorProf.Core.Interfaces.ICorProfilerCallback8), new(
                 ICorProfilerCallback8ManagedWrapper.VtblCount,
                 &ICorProfilerCallback8ManagedWrapper.InitVtable,
                 CorProfConsts.IID_ICorProfilerCallback8) },
-            { typeof(Interfaces.ICorProfilerCallback9), new(
+            { typeof(CorProf.Core.Interfaces.ICorProfilerCallback9), new(
                 ICorProfilerCallback9ManagedWrapper.VtblCount,
                 &ICorProfilerCallback9ManagedWrapper.InitVtable,
                 CorProfConsts.IID_ICorProfilerCallback9) },
