@@ -5,6 +5,74 @@ A prototype [.NET profiler](https://learn.microsoft.com/en-us/dotnet/framework/u
 > 🚧 WIP WIP WIP 🚧
 > MORE INFO AND INSTRUCTION SOON
 
+```csharp
+///
+/// A sample profiler callback that prints the loaded modules
+///
+[ProfilerCallback("090B7720-6605-462B-86A0-C4D4C444D3F5")]
+internal unsafe class MyProfiler : ICorProfilerCallback2
+{
+    private ICorProfilerInfo4* _profilerInfo;
+    
+    int ICorProfilerCallback.Initialize(CorProf.Bindings.IUnknown* unknown)
+    {
+        var guid_ = CorProfConsts.IID_ICorProfilerInfo4;
+
+        var hr = Marshal.QueryInterface((nint)unknown, ref guid_, out var pinfo);
+
+        if (hr < 0)
+        {
+            return HResult.E_FAIL;
+        }
+
+        var eventMask = COR_PRF_MONITOR.COR_PRF_MONITOR_MODULE_LOADS;
+
+        _profilerInfo = (ICorProfilerInfo4*)pinfo;
+
+        hr = _profilerInfo->SetEventMask((uint)eventMask);
+        
+        if (hr < 0)
+        {
+            return HResult.E_FAIL;
+        }
+    }
+    
+    int ICorProfilerCallback.ModuleLoadFinished(ulong moduleId, int hrStatus)
+    {
+        var pbBaseLoadAddr = (byte*)null;
+        uint pcchName = 0;
+        ulong assemblyId = 0;
+        var szName = (ushort*)NativeMemory.Alloc(sizeof(ushort) * 300);
+
+        var hr = _profilerInfo->GetModuleInfo(
+            moduleId,
+            &pbBaseLoadAddr,
+            300,
+            &pcchName,
+            szName,
+            &assemblyId);
+
+        if (hr < 0)
+        {
+            return HResult.E_FAIL;
+        }
+
+        var module = Marshal.PtrToStringUni((nint)szName);
+
+        Console.WriteLine($"Loaded Moudle -> '{module}'");
+
+        NativeMemory.Free(szName);
+
+        return HResult.S_OK;
+    }
+    
+    int ICorProfilerCallback.Shutdown() 
+    {
+        return HResult.S_OK; 
+    }
+}
+```
+
 ## Overview
 <img src="/docs/images/overview.png"></img>
 
