@@ -2,31 +2,38 @@
 {
     public class ShutdownGuard: IDisposable
     {
-        private static CountdownEvent _hooksInProgress = new(0);
+        private static int _preventHooks = 0;
+        private static int _hooksInProgress = 0;
 
         public static bool HasShutdownStarted()
         {
-            return _hooksInProgress.CurrentCount == 0;
+            return _preventHooks == 1;
         }
 
         public static void WaitForInProgressHooks()
         {
-            _hooksInProgress.Wait();
+            Interlocked.Exchange(ref _preventHooks, 1);
+
+            while (_hooksInProgress > 0)
+            {
+                Thread.Sleep(10);
+            }
         }
 
         public static void Initialize()
         {
-            _hooksInProgress.Reset();
+            _preventHooks = 0;
+            _hooksInProgress = 0;
         }
 
         public ShutdownGuard()
         {
-            _hooksInProgress.AddCount(1);
+            Interlocked.Increment(ref _hooksInProgress);
         }
 
         public void Dispose()
         {
-            _hooksInProgress.Signal(1);
+            Interlocked.Decrement(ref _hooksInProgress);
         }
     }
 }
