@@ -131,8 +131,10 @@ C:\ManagedCorProfiler\ManagedCorProfiler> █</samp></pre>
 [...OMITTED FOR BREVITY...]
 C:\ManagedCorProfiler\ManagedCorProfiler> █</samp></pre>
 
-## Next Work
-- some source generation magic to ease the creation of COM interfaces, wrappers and CLR types.
+## Contributing
+Any contribution is welcome.
+I'm actually working on porting the tests at [dotnet/runtime/tree/main/src/tests/profiler](https://github.com/dotnet/runtime/tree/main/src/tests/profiler),
+this is a good place to start contributing.
 
 ## Codegen
 - code contained in the `*.Bindings` projects is generated using [ClangSharpPInvokeGenerator](https://github.com/dotnet/ClangSharp)
