@@ -1,6 +1,4 @@
 ﻿using CorProf.Bindings;
-using System.Reflection;
-using System.Runtime.InteropServices;
 
 namespace CorProf.Helpers
 {
@@ -30,7 +28,7 @@ namespace CorProf.Helpers
             uint token = 0;
             ulong frameInfo = 0;
             uint nTypeArgs = 0;
-            ulong* typeArgs = (ulong*)NativeMemory.Alloc(sizeof(ulong) * Shortlength);
+            using var typeArgs = NativeBuffer<ulong>.Alloc(Shortlength);
             funcName = "???";
 
             var hr = _profInfo->GetFunctionInfo2(
@@ -51,37 +49,35 @@ namespace CorProf.Helpers
 
             var iMetaDataImportIID = new Guid(0x7dac8207, 0xd3ae, 0x4c75, 0x9b, 0x67, 0x92, 0x80, 0x1a, 0x49, 0x7d, 0x44);
 
-            var ptr = (IUnknown*)NativeMemory.Alloc((nuint)sizeof(nint));
+            var ptr = NativeBuffer.Alloc((nuint)sizeof(nint));
 
             hr = _profInfo->GetModuleMetaData(
                 moduleId,
                 (uint)CorOpenFlags.ofRead,
                 &iMetaDataImportIID,
-                &ptr);
+                (IUnknown**)&ptr);
 
             if (hr < 0)
             {
-                NativeMemory.Free(typeArgs);
                 return hr;
             }
 
             var metadataImport = (IMetaDataImport*)ptr;
 
-            var szName = (ushort*)NativeMemory.Alloc(sizeof(ushort) * 300);
+            using var szName = NativeBuffer<ushort>.Alloc(300);
 
             uint typeDefToken = 0;
 
             metadataImport->GetMethodProps(
                 token, &typeDefToken, szName, 300, null, null, null, null, null, null);
 
-            string name = Marshal.PtrToStringUni((nint)szName) ?? "???";
-
-            NativeMemory.Free(szName);
+            string name = MarshalHelpers.PtrToStringUtf16(szName) ?? "???";
 
             if (nTypeArgs > 0)
             {
                 name += "<";
             }
+
 
             for (uint i = 0; i < nTypeArgs; i++)
             {
@@ -102,7 +98,6 @@ namespace CorProf.Helpers
 
             funcName = name;
 
-            NativeMemory.Free(typeArgs);
             return S_OK;
         }
 
@@ -112,7 +107,7 @@ namespace CorProf.Helpers
             uint mdTypeDef;
             ulong parentClassID;
             uint nTypeArgs;
-            ulong* typeArgs = (ulong*) NativeMemory.Alloc(sizeof(ulong) * Shortlength);
+            using var typeArgs = NativeBuffer<ulong>.Alloc(Shortlength);
             className = string.Empty;
 
             if (classId == 0)
@@ -125,14 +120,13 @@ namespace CorProf.Helpers
                 &moduleId, 
                 &mdTypeDef,
                 &parentClassID, 
-                Shortlength, 
+                typeArgs.Length, 
                 &nTypeArgs, 
                 typeArgs);
 
             if (hr < 0)
             {
                 className = "GetClassIDNameFailed";
-                NativeMemory.Free(typeArgs);
                 return hr;
             }
 
@@ -146,13 +140,13 @@ namespace CorProf.Helpers
 
             var iMetaDataImportIID = new Guid(0x7dac8207, 0xd3ae, 0x4c75, 0x9b, 0x67, 0x92, 0x80, 0x1a, 0x49, 0x7d, 0x44);
 
-            var ptr = (CorProf.Bindings.IUnknown*)NativeMemory.Alloc((nuint)sizeof(nint));
+            var ptr = NativeBuffer.Alloc((nuint)sizeof(nint));
 
             hr = _profInfo->GetModuleMetaData(
                 moduleId,
                 (uint)(CorOpenFlags.ofRead | CorOpenFlags.ofWrite),
                 &iMetaDataImportIID,
-                &ptr);
+                (IUnknown**)&ptr);
 
             if (hr < 0)
             {
@@ -161,7 +155,7 @@ namespace CorProf.Helpers
 
             var metadataImport = (IMetaDataImport*)ptr;
 
-            var szName = (ushort*)NativeMemory.Alloc(sizeof(ushort) * 300);
+            using var szName = NativeBuffer<ushort>.Alloc(300);
 
             uint typeDefToken = 0;
             uint typeDefFlags = 0;
@@ -169,18 +163,17 @@ namespace CorProf.Helpers
             hr = metadataImport->GetTypeDefProps(
                 typeDefToken, 
                 szName, 
-                300, 
+                szName.Length, 
                 null, 
                 &typeDefFlags, 
                 null);
 
             if (hr < 0)
             {
-                NativeMemory.Free(szName);
                 return hr;
             }
 
-            string name = Marshal.PtrToStringUni((nint)szName) ?? "???";
+            string name = MarshalHelpers.PtrToStringUtf16(szName) ?? "???";
 
             if (nTypeArgs > 0)
             {
@@ -203,8 +196,6 @@ namespace CorProf.Helpers
             {
                 name += ">";
             }
-
-            NativeMemory.Free(typeArgs);
 
             className = name;
 
