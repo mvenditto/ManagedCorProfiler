@@ -73,6 +73,7 @@ namespace CorProf.Generator
 
             var source = template.Render(new
             {
+                ProfilerNamespace = string.IsNullOrEmpty(fullNamespace) ? "DllExports" : fullNamespace,
                 ProfilerTypeName = className
             });
 

@@ -25,6 +25,20 @@
   </ItemGroup>
 
   <PropertyGroup>
+    <Title>The source generator for CorProf.Core</Title>
+    <VersionPrefix>0.0.1</VersionPrefix>
+    <VersionSuffix></VersionSuffix>
+    <Authors>mvenditto</Authors>
+    <Company>mvenditto</Company>
+    <Description>Generates the profiler dll entry points (DllMain, DllGetClassObject,...)</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl></PackageProjectUrl>
+    <RepositoryUrl>https://github.com/mvenditto/ManagedCorProfiler</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>net;clr;profiler;cor;icorprofilercallback;csharp;generator</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <GetTargetPathDependsOn>$(GetTargetPathDependsOn);GetDependencyTargetPaths</GetTargetPathDependsOn>
   </PropertyGroup>
 

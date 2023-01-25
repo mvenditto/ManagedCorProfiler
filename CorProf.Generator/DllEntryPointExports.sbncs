@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using CorProf.Utilities;
 
-namespace CorProf
+namespace {{ profiler_namespace }}
 {
     public static class DllEntryPointExports
     {
@@ -14,11 +14,9 @@ namespace CorProf
         public static unsafe int DllGetClassObject(Guid* rclsid, Guid* riid, IntPtr* ppv)
         {
             var guid = *riid;
-
             if (guid == Guids.IID_IUnknown
              || guid == Guids.IID_IClassFactory)
             {
-
                 var cw = new ClassFactoryComWrappers();
 
                 var classFactory = new DefaultClassFactory(new {{ profiler_type_name }}());
@@ -32,6 +30,8 @@ namespace CorProf
                 Debug.Assert(hr == 0);
 
                 *ppv = ptr;
+                
+                Console.WriteLine($"Return: 0x{hr:x8}");
 
                 return HResult.S_OK;
             }
