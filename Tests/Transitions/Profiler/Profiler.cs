@@ -1,8 +1,6 @@
-﻿  using Microsoft.Diagnostics.Runtime.Utilities;
+﻿using Microsoft.Diagnostics.Runtime.Utilities;
 using System.Runtime.InteropServices;
-using Serilog;
 using CorProf.Core;
-using CorProf.Shared;
 using CorProf.Helpers;
 using CorProf.Bindings;
 using ICorProfilerCallback = CorProf.Core.Interfaces.ICorProfilerCallback;
@@ -27,9 +25,9 @@ namespace Transitions
         /// with DllImport("Profiler")
         /// </summary>
         [UnmanagedCallersOnly(EntryPoint = "DoPInvoke")]
-        public static void DoPInvoke()
+        public static void DoPInvoke(delegate* unmanaged<int, int> callback, int i)
         {
-            Console.WriteLine("PINVOKE");
+            Console.WriteLine($"DoPInvoke: {callback(i)}");
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -45,25 +43,15 @@ namespace Transitions
             public COR_PRF_TRANSITION_REASON ManagedToUnmanaged;
         }
 
-        public TransitionsProfiler()
-        {
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Verbose()
-                .WriteTo.Console()
-                .CreateLogger();
-        }
-
         int ICorProfilerCallback.Initialize(IUnknown* unknown)
         {
-            Log.Information("INITIALIZE");
-
             var guid_ = CorProfConsts.IID_ICorProfilerInfo5;
 
             var hr = Marshal.QueryInterface((nint)unknown, ref guid_, out var pinfo);
 
             if (hr < 0)
             {
-                Log.Error("Failed to get ICorProfilerInfo11 with hr=0x{hr:x8}", hr);
+                Console.WriteLine($"Failed to get ICorProfilerInfo11 with hr=0x{hr:x8}");
                 return HResult.E_FAIL;
             }
 
@@ -79,89 +67,55 @@ namespace Transitions
 
             if (hr < 0)
             {
-                Log.Error("SetEventMask2 failed with hr=0x{hr:x8}", hr);
+                Console.WriteLine($"SetEventMask2 failed with hr=0x{hr:x8}");
                 return HResult.E_FAIL;
             }
 
-            uint bufferSize = 1024;
-            uint envVarLen = 0;
-            var envVar = (ushort*)NativeMemory.Alloc(sizeof(ushort) * bufferSize);
-            var envVarName = Marshal.StringToHGlobalUni("PInvoke_Transition_Expected_Name");
+            // exploit the fact the we are actually inject in the profilee process
+            _expectedPinvokeName = Environment.GetEnvironmentVariable(
+                "PInvoke_Transition_Expected_Name",
+                EnvironmentVariableTarget.Process)!;
 
-            hr = _profilerInfo->GetEnvironmentVariableA(
-                (ushort*)envVarName, 
-                bufferSize, 
-                &envVarLen, 
-                envVar);
+            _expectedReversePInvokeName = Environment.GetEnvironmentVariable(
+                "ReversePInvoke_Transition_Expected_Name",
+                EnvironmentVariableTarget.Process)!;
 
-            if (hr < 0)
-            {
-                Log.Error("GetEnvironmentVariableA failed with hr=0x{hr:x8}", hr);
-                NativeMemory.Free(envVar);
-                return HResult.E_FAIL;
-            }
+            Console.WriteLine($"{_expectedPinvokeName} {_expectedReversePInvokeName}");
 
-            _expectedPinvokeName = Marshal.PtrToStringUni((nint)envVar, (int)envVarLen);
-
-            
-            envVarName = Marshal.StringToHGlobalUni("ReversePInvoke_Transition_Expected_Name");
-
-            hr = _profilerInfo->GetEnvironmentVariableA(
-                (ushort*)envVarName,
-                bufferSize,
-                &envVarLen,
-                envVar);
-
-
-            _expectedReversePInvokeName = Marshal.PtrToStringUni((nint)envVar, (int)envVarLen);
-
-            if (hr < 0)
-            {
-                Log.Error("GetEnvironmentVariableA failed with hr=0x{hr:x8}", hr);
-                NativeMemory.Free(envVar);
-                return HResult.E_FAIL;
-            }
-
-            Log.Information("{A} {B}", _expectedPinvokeName, _expectedReversePInvokeName);
-
-            NativeMemory.Free(envVar);
             return HResult.S_OK;
         }
 
         int ICorProfilerCallback.ManagedToUnmanagedTransition(ulong functionId, COR_PRF_TRANSITION_REASON reason)
-        {
+        {/*
             var _ = new ShutdownGuard();
-
-            int hr = 0;
-            string funcName = "";
 
             if (ShutdownGuard.HasShutdownStarted())
             {
-                Log.Information("ShutdownGuard::HasShutdownStarted");
+                Console.WriteLine("ShutdownGuard::HasShutdownStarted");
                 return HResult.S_OK;
             }
 
-            hr = _profilerInfoHelpers.GetFunctionIDName(functionId, out funcName);
+            int hr = _profilerInfoHelpers.GetFunctionIDName(functionId, out string funcName);
 
             if (hr < 0)
             {
-                Log.Error("Error 0x{HR:x8}", hr);
+                Console.WriteLine($"Error 0x{hr:x8}");
             }
             else
             {
-                Log.Information("M => N : {FuncName}", funcName);
-            }
+                Console.WriteLine($"M => N : {funcName}");
+            }*/
 
             return HResult.S_OK;
         }
 
         int ICorProfilerCallback.UnmanagedToManagedTransition(ulong functionId, COR_PRF_TRANSITION_REASON reason)
-        {
+        {/*
             using var _ = new ShutdownGuard();
 
             if (ShutdownGuard.HasShutdownStarted())
             {
-                Log.Information("ShutdownGuard::HasShutdownStarted");
+                Console.WriteLine("ShutdownGuard::HasShutdownStarted");
                 return HResult.S_OK;
             }
 
@@ -169,19 +123,19 @@ namespace Transitions
 
             if (hr < 0)
             {
-                Log.Error("Error 0x{HR:x8}", hr);
+                Console.WriteLine($"Error 0x{hr:x8}");
             }
             else
             {
-                Log.Information("U => M : {FuncName}", funcName);
-            }
+                Console.WriteLine($"U => M : {funcName}");
+            }*/
 
             return HResult.S_OK;
         }
 
         int ICorProfilerCallback.Shutdown() 
         {
-            Log.Information("Shutdown.");
+            Console.WriteLine("PROFILER TEST PASSES");
 
             return HResult.S_OK; 
         }
