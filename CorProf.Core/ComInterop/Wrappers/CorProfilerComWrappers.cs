@@ -329,9 +329,7 @@ namespace CorProf.ComInterop.Wrappers
             }
 
             var implDefinitionLen = profilerCallbackIfaces.Count();
-                
-            Console.WriteLine($"IFACE {implDefinitionLen} {profilerCallbackIfaces.Last()}");
-
+            
             var implDef = (ComInterfaceEntry*)RuntimeHelpers.AllocateTypeAssociatedMemory(
                     typeof(CorProfilerComWrappers),
                     sizeof(ComInterfaceEntry) * implDefinitionLen);
@@ -349,11 +347,12 @@ namespace CorProf.ComInterop.Wrappers
                         (int)(IntPtr.Size * vtblInitializer.VtableCount));
 
                 InitIUnknownVtbl(vtable);
+
                 vtblInitializer.InitVtable(vtable);
 
                 implDef[idx].IID = vtblInitializer.IID;
-                implDef[idx++].Vtable = (nint)vtable;
 
+                implDef[idx++].Vtable = (nint)vtable;
             }
             
             count = implDefinitionLen;
@@ -363,7 +362,6 @@ namespace CorProf.ComInterop.Wrappers
 
         protected override object? CreateObject(nint externalComObject, CreateObjectFlags flags)
         {
-            Console.WriteLine("CorProfilerComWrappers!CreateObject");
             Debug.Assert(flags.HasFlag(CreateObjectFlags.UniqueInstance));
 
             // Throw an exception if the type is not supported by the implementation.

@@ -31,8 +31,6 @@ namespace {{ profiler_namespace }}
 
                 *ppv = ptr;
                 
-                Console.WriteLine($"Return: 0x{hr:x8}");
-
                 return HResult.S_OK;
             }
 
