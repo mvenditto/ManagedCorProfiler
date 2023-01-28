@@ -73,6 +73,8 @@ unsafe class Transitions
     {
         if (args.Length > 1 && args[0].Equals("RunTest", StringComparison.OrdinalIgnoreCase))
         {
+            Console.WriteLine("RunTest: " + args[1]);
+
             switch (args[1])
             {
                 case nameof(BlittablePInvokeToUnmanagedCallersOnly):

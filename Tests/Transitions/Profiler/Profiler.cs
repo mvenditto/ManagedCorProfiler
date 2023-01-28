@@ -1,37 +1,33 @@
-﻿using Microsoft.Diagnostics.Runtime.Utilities;
-using System.Runtime.InteropServices;
+﻿using CorProf.Bindings;
 using CorProf.Core;
 using CorProf.Helpers;
-using CorProf.Bindings;
+using CorProf.Shared;
+using Microsoft.Diagnostics.Runtime.Utilities;
+using System.Runtime.InteropServices;
+
 using ICorProfilerCallback = CorProf.Core.Interfaces.ICorProfilerCallback;
 using ICorProfilerCallback2 = CorProf.Core.Interfaces.ICorProfilerCallback2;
+
+using static CorProf.Bindings.COR_PRF_TRANSITION_REASON;
 
 namespace Transitions
 {
     [ProfilerCallback("090B7720-6605-462B-86A0-C4D4C444D3F5")]
     internal unsafe class TransitionsProfiler : ICorProfilerCallback2
     {
-        private int _failures = 0;
         private ICorProfilerInfo11* _profilerInfo;
         private ICorProfilerInfoHelpers2 _profilerInfoHelpers;
+
         private string _expectedPinvokeName;
         private string _expectedReversePInvokeName;
+
+        private int _failures = 0;
+        private readonly TransitionInstance _pinvoke = new();
+        private readonly TransitionInstance _reversePinvoke = new();
+
         private const COR_PRF_TRANSITION_REASON NO_TRANSITION = (COR_PRF_TRANSITION_REASON)(-1);
 
-        private const int ERROR_ENVVAR_NOT_FOUND = 0xCB;
-
-        /// <summary>
-        /// This can be PInvoked from the profiler application
-        /// with DllImport("Profiler")
-        /// </summary>
-        [UnmanagedCallersOnly(EntryPoint = "DoPInvoke")]
-        public static void DoPInvoke(delegate* unmanaged<int, int> callback, int i)
-        {
-            Console.WriteLine($"DoPInvoke: {callback(i)}");
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct TransitionInstance
+        private class TransitionInstance
         {
             public TransitionInstance()
             {
@@ -41,6 +37,16 @@ namespace Transitions
 
             public COR_PRF_TRANSITION_REASON UnmanagedToManaged;
             public COR_PRF_TRANSITION_REASON ManagedToUnmanaged;
+        }
+
+        /// <summary>
+        /// This can be PInvoked from the profiler application
+        /// with DllImport("Profiler")
+        /// </summary>
+        [UnmanagedCallersOnly(EntryPoint = "DoPInvoke")]
+        public static void DoPInvoke(delegate* unmanaged<int, int> callback, int i)
+        {
+            Console.WriteLine($"Profiler::DoPInvoke(): {callback(i)}");
         }
 
         int ICorProfilerCallback.Initialize(IUnknown* unknown)
@@ -58,12 +64,12 @@ namespace Transitions
             _profilerInfo = (ICorProfilerInfo11*)pinfo;
 
             _profilerInfoHelpers = new ICorProfilerInfoHelpers2(
-                (ICorProfilerInfo2*) pinfo);
+                (ICorProfilerInfo2*)pinfo);
 
             var eventsLow = COR_PRF_MONITOR.COR_PRF_MONITOR_CODE_TRANSITIONS
                 | COR_PRF_MONITOR.COR_PRF_DISABLE_INLINING;
 
-            hr = _profilerInfo->SetEventMask2((uint) eventsLow, 0);
+            hr = _profilerInfo->SetEventMask2((uint)eventsLow, 0);
 
             if (hr < 0)
             {
@@ -71,7 +77,7 @@ namespace Transitions
                 return HResult.E_FAIL;
             }
 
-            // exploit the fact the we are actually inject in the profilee process
+            // exploit the fact the we are actually injected in the profilee process
             _expectedPinvokeName = Environment.GetEnvironmentVariable(
                 "PInvoke_Transition_Expected_Name",
                 EnvironmentVariableTarget.Process)!;
@@ -80,64 +86,106 @@ namespace Transitions
                 "ReversePInvoke_Transition_Expected_Name",
                 EnvironmentVariableTarget.Process)!;
 
-            Console.WriteLine($"{_expectedPinvokeName} {_expectedReversePInvokeName}");
-
             return HResult.S_OK;
         }
 
-        int ICorProfilerCallback.ManagedToUnmanagedTransition(ulong functionId, COR_PRF_TRANSITION_REASON reason)
-        {/*
-            var _ = new ShutdownGuard();
-
-            if (ShutdownGuard.HasShutdownStarted())
-            {
-                Console.WriteLine("ShutdownGuard::HasShutdownStarted");
-                return HResult.S_OK;
-            }
-
-            int hr = _profilerInfoHelpers.GetFunctionIDName(functionId, out string funcName);
+        private bool FunctionIsTargetFunction(
+            ulong functionId,
+            out TransitionInstance? inst,
+            out string funcName)
+        {
+            inst = null;
+            int hr = _profilerInfoHelpers.GetFunctionIDName(functionId, out funcName);
 
             if (hr < 0)
             {
-                Console.WriteLine($"Error 0x{hr:x8}");
+                Console.WriteLine($"GetFunctionIDName error 0x{hr:x8}");
             }
             else
             {
-                Console.WriteLine($"M => N : {funcName}");
-            }*/
+                if (funcName == _expectedPinvokeName)
+                {
+                    Console.WriteLine($"Matched Expected_PInvokeName: {funcName}");
+                    inst = _pinvoke;
+                }
+                else if (funcName == _expectedReversePInvokeName)
+                {
+                    Console.WriteLine($"Matched Expected_ReversePInvokeName: {funcName}");
+                    inst = _reversePinvoke;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        int ICorProfilerCallback.ManagedToUnmanagedTransition(ulong functionId, COR_PRF_TRANSITION_REASON reason)
+        {
+            using var _ = new ShutdownGuard();
+
+            if (ShutdownGuard.HasShutdownStarted())
+            {
+                return HResult.S_OK;
+            }
+
+            if (FunctionIsTargetFunction(functionId, out TransitionInstance? inst, out string funcName) && inst != null)
+            {
+                if (inst.ManagedToUnmanaged != NO_TRANSITION)
+                {
+                    Console.WriteLine($"[M -> U] Duplicate transition: '{funcName}'");
+                    _failures += 1;
+                }
+                Console.WriteLine($"[M -> U] '{funcName}'");
+                inst.ManagedToUnmanaged = reason;
+            }
 
             return HResult.S_OK;
         }
 
         int ICorProfilerCallback.UnmanagedToManagedTransition(ulong functionId, COR_PRF_TRANSITION_REASON reason)
-        {/*
+        {
             using var _ = new ShutdownGuard();
 
             if (ShutdownGuard.HasShutdownStarted())
             {
-                Console.WriteLine("ShutdownGuard::HasShutdownStarted");
                 return HResult.S_OK;
             }
 
-            int hr = _profilerInfoHelpers.GetFunctionIDName(functionId, out var funcName);
-
-            if (hr < 0)
+            if (FunctionIsTargetFunction(functionId, out TransitionInstance? inst, out string funcName) && inst != null)
             {
-                Console.WriteLine($"Error 0x{hr:x8}");
+                if (inst.UnmanagedToManaged != NO_TRANSITION)
+                {
+                    Console.WriteLine($"[U -> M] Duplicate transition: '{funcName}'");
+                    _failures += 1;
+                }
+                Console.WriteLine($"[M -> U] '{funcName}'");
+                inst.UnmanagedToManaged = reason;
             }
-            else
-            {
-                Console.WriteLine($"U => M : {funcName}");
-            }*/
 
             return HResult.S_OK;
         }
 
-        int ICorProfilerCallback.Shutdown() 
+        int ICorProfilerCallback.Shutdown()
         {
-            Console.WriteLine("PROFILER TEST PASSES");
+            bool successPinvoke = _pinvoke.ManagedToUnmanaged == COR_PRF_TRANSITION_CALL
+                    && _pinvoke.UnmanagedToManaged == COR_PRF_TRANSITION_RETURN;
 
-            return HResult.S_OK; 
+            bool successReversePinvoke = _reversePinvoke.ManagedToUnmanaged == COR_PRF_TRANSITION_RETURN
+                            && _reversePinvoke.UnmanagedToManaged == COR_PRF_TRANSITION_CALL;
+
+            if (_failures == 0 && successPinvoke && successReversePinvoke)
+            {
+                Console.WriteLine("PROFILER TEST PASSES");
+            }
+            else
+            {
+                Console.WriteLine($"Test failed _failures={_failures} _pinvoke={successPinvoke} _reversePinvoke={successReversePinvoke}");
+            }
+
+            return HResult.S_OK;
         }
     }
 }

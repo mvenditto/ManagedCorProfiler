@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "TransitionsApp": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "CORE_ROOT": "C:\\Users\\mvenditto\\Source\\Repos\\runtime\\artifacts\\bin\\coreclr\\windows.x64.Debug",
+        "CORE_LIBRARIES": "C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\7.0.0"
+      }
+    }
+  }
+}
