@@ -3,6 +3,11 @@ using Microsoft.Diagnostics.Runtime.Utilities;
 
 namespace CorProf.Core.Interfaces
 {
+    /// <summary>
+    /// <remarks>
+    /// For the .NET Framework version 2.0 or later, the profiler must also implement the ICorProfilerCallback2
+    /// </remarks>
+    /// </summary>
     public unsafe interface ICorProfilerCallback
     {
         public readonly static Guid IID_ICorProfilerCallback = new("176fbed1-a55c-4796-98ca-a9da0ef883e7");
