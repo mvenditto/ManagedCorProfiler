@@ -105,12 +105,10 @@ namespace Transitions
             {
                 if (funcName == _expectedPinvokeName)
                 {
-                    Console.WriteLine($"Matched Expected_PInvokeName: {funcName}");
                     inst = _pinvoke;
                 }
                 else if (funcName == _expectedReversePInvokeName)
                 {
-                    Console.WriteLine($"Matched Expected_ReversePInvokeName: {funcName}");
                     inst = _reversePinvoke;
                 }
                 else
