@@ -2,8 +2,8 @@
 
 A prototype [.NET profiler](https://learn.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/) written in C# leveraging [NativeAOT](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/) + [ComWrappers](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.comwrappers?view=net-7.0).
 
-> 🚧 WIP WIP WIP 🚧
-> MORE INFO AND INSTRUCTION SOON
+> **Warning**
+> Work in progress
 
 ```csharp
 ///
@@ -77,6 +77,8 @@ internal unsafe class MyProfiler : ICorProfilerCallback2
 <img src="/docs/images/overview.png"></img>
 
 ## Sample
+<details>
+  <summary>Sample</summary>
 The sample produces a native DLL that can be loaded as a CLR Profiler.
 
 To test the concept, the example does a few basic things:
@@ -130,6 +132,7 @@ C:\ManagedCorProfiler\ManagedCorProfiler> █</samp></pre>
           4    3 00497430 DotNetRuntimeDebugHeader = DotNetRuntimeDebugHeader
 [...OMITTED FOR BREVITY...]
 C:\ManagedCorProfiler\ManagedCorProfiler> █</samp></pre>
+</details>
 
 ## Contributing
 Any contribution is welcome.
@@ -139,9 +142,6 @@ this is a good place to start contributing.
 ## Codegen
 - code contained in the `*.Bindings` projects is generated using [ClangSharpPInvokeGenerator](https://github.com/dotnet/ClangSharp)
 - at this point, some manual tweaks are needed to make the generated bindings for an header compile (e.g fixing callconvs)
-
-## Function Hooks
-TBD
 
 ## Resources
 ### Misc
