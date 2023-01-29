@@ -22,8 +22,8 @@ namespace Transitions
         private string _expectedReversePInvokeName;
 
         private int _failures = 0;
-        private readonly TransitionInstance _pinvoke = new();
-        private readonly TransitionInstance _reversePinvoke = new();
+        private TransitionInstance _pinvoke;
+        private TransitionInstance _reversePinvoke;
 
         private const COR_PRF_TRANSITION_REASON NO_TRANSITION = (COR_PRF_TRANSITION_REASON)(-1);
 
@@ -46,11 +46,17 @@ namespace Transitions
         [UnmanagedCallersOnly(EntryPoint = "DoPInvoke")]
         public static void DoPInvoke(delegate* unmanaged<int, int> callback, int i)
         {
-            Console.WriteLine($"Profiler::DoPInvoke(): {callback(i)}");
+            Console.WriteLine($"PInvoke received i={callback(i)}");
         }
 
         int ICorProfilerCallback.Initialize(IUnknown* unknown)
         {
+            ShutdownGuard.Initialize();
+
+            Console.WriteLine("Profiler.dll!Profiler::Initialize");
+
+            Console.Out.Flush();
+
             var guid_ = CorProfConsts.IID_ICorProfilerInfo5;
 
             var hr = Marshal.QueryInterface((nint)unknown, ref guid_, out var pinfo);
@@ -86,6 +92,11 @@ namespace Transitions
                 "ReversePInvoke_Transition_Expected_Name",
                 EnvironmentVariableTarget.Process)!;
 
+            _pinvoke = new TransitionInstance();
+            _reversePinvoke = new TransitionInstance();
+
+            Console.WriteLine("Profiler.dll!Profiler::Initialize: OK.");
+
             return HResult.S_OK;
         }
 
@@ -95,7 +106,7 @@ namespace Transitions
             out string funcName)
         {
             inst = null;
-            int hr = _profilerInfoHelpers.GetFunctionIDName(functionId, out funcName);
+            int hr = _profilerInfoHelpers.GetFunctionIDFullyQualifiedName(functionId, out funcName);
 
             if (hr < 0)
             {
@@ -126,6 +137,7 @@ namespace Transitions
 
             if (ShutdownGuard.HasShutdownStarted())
             {
+                Console.WriteLine("Shutting-down: abort callback...");
                 return HResult.S_OK;
             }
 
@@ -133,10 +145,13 @@ namespace Transitions
             {
                 if (inst.ManagedToUnmanaged != NO_TRANSITION)
                 {
-                    Console.WriteLine($"[M -> U] Duplicate transition: '{funcName}'");
+                    Console.WriteLine($"M>>> Duplicate transition: '{funcName}' 0x{functionId:x8}");
                     _failures += 1;
                 }
-                Console.WriteLine($"[M -> U] '{funcName}'");
+                else
+                {
+                    Console.WriteLine($"M>>> '{funcName}' 0x{functionId:x8} ({reason})");
+                }
                 inst.ManagedToUnmanaged = reason;
             }
 
@@ -149,6 +164,7 @@ namespace Transitions
 
             if (ShutdownGuard.HasShutdownStarted())
             {
+                Console.WriteLine("Shutting-down: abort callback...");
                 return HResult.S_OK;
             }
 
@@ -156,10 +172,13 @@ namespace Transitions
             {
                 if (inst.UnmanagedToManaged != NO_TRANSITION)
                 {
-                    Console.WriteLine($"[U -> M] Duplicate transition: '{funcName}'");
+                    Console.WriteLine($"<<<U Duplicate transition: '{funcName}' 0x{functionId:x8}");
                     _failures += 1;
                 }
-                Console.WriteLine($"[M -> U] '{funcName}'");
+                else
+                {
+                    Console.WriteLine($"<<<U '{funcName}' 0x{functionId:x8} ({reason})");
+                }
                 inst.UnmanagedToManaged = reason;
             }
 
@@ -168,6 +187,13 @@ namespace Transitions
 
         int ICorProfilerCallback.Shutdown()
         {
+
+            Console.WriteLine("Profiler.dll!Profiler::Shutdown");
+            Console.Out.Flush();
+
+            // Wait for any in progress profiler callbacks to finish.
+            ShutdownGuard.WaitForInProgressHooks();
+                
             bool successPinvoke = _pinvoke.ManagedToUnmanaged == COR_PRF_TRANSITION_CALL
                     && _pinvoke.UnmanagedToManaged == COR_PRF_TRANSITION_RETURN;
 

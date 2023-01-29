@@ -1,11 +1,17 @@
 ﻿using System.Runtime.InteropServices;
 using Tests.Common;
 
+/// <summary>
+/// TODO: investigate:
+///     System.Private.CoreLib.dll!EtwEnableCallback::Invoke
+///     System.Private.CoreLib.dll!EtwEnableCallback::Invoke
+/// that would mess the test
+/// </summary>
 unsafe class Transitions
 {
     static readonly string PInvokeExpectedNameEnvVar = "PInvoke_Transition_Expected_Name";
     static readonly string ReversePInvokeExpectedNameEnvVar = "ReversePInvoke_Transition_Expected_Name";
-    static readonly Guid TransitionsGuid = new Guid("027AD7BB-578E-4921-B29F-B540363D83EC");
+    static readonly Guid TransitionsGuid = new("090B7720-6605-462B-86A0-C4D4C444D3F5");
 
     [UnmanagedFunctionPointer(CallingConvention.Winapi)]
     delegate int InteropDelegate(int i);
@@ -25,11 +31,13 @@ unsafe class Transitions
 
     public static int BlittablePInvokeToBlittableInteropDelegate()
     {
+        Console.WriteLine(nameof(BlittablePInvokeToBlittableInteropDelegate));
         InteropDelegate del = DoDelegateReversePInvoke;
 
         DoPInvoke((delegate* unmanaged<int, int>)Marshal.GetFunctionPointerForDelegate(del), 13);
-        GC.KeepAlive(del);
-        
+
+        GC.KeepAlive(del); 
+
         return 100;
     }
 
@@ -88,23 +96,23 @@ unsafe class Transitions
             }
         }
 
-        
-        if (!RunProfilerTest(nameof(BlittablePInvokeToUnmanagedCallersOnly), nameof(DoPInvoke), nameof(DoReversePInvoke)))
+        if (!RunProfilerTest(nameof(BlittablePInvokeToUnmanagedCallersOnly), "Transitions::" + nameof(DoPInvoke), "Transitions::"+nameof(DoReversePInvoke)))
         {
             return 101;
         }
-        
-        if (!RunProfilerTest(nameof(BlittablePInvokeToBlittableInteropDelegate), nameof(DoPInvoke), "Invoke"))
+
+        if (!RunProfilerTest(nameof(BlittablePInvokeToBlittableInteropDelegate), "Transitions::" + nameof(DoPInvoke), "InteropDelegate::Invoke"))
         {
             return 102;
         }
-
-        if (!RunProfilerTest(nameof(NonBlittablePInvokeToUnmanagedCallersOnly), nameof(DoPInvokeNonBlitable), nameof(DoReversePInvoke)))
+        
+        if (!RunProfilerTest(nameof(NonBlittablePInvokeToUnmanagedCallersOnly), "Transitions::" + nameof(DoPInvokeNonBlitable), "Transitions::" + nameof(DoReversePInvoke)))
         {
             return 101;
         }
+        
 
-        if (!RunProfilerTest(nameof(NonBlittablePInvokeToNonBlittableInteropDelegate), nameof(DoPInvokeNonBlitable), "Invoke"))
+        if (!RunProfilerTest(nameof(NonBlittablePInvokeToNonBlittableInteropDelegate), "Transitions::" + nameof(DoPInvokeNonBlitable), "InteropDelegateNonBlittable::Invoke"))
         {
             return 102;
         }
@@ -122,8 +130,8 @@ unsafe class Transitions
                                       profileeArguments: testName,
                                       envVars: new Dictionary<string, string>
                                       {
-                                            { PInvokeExpectedNameEnvVar, pInvokeExpectedName },
-                                            { ReversePInvokeExpectedNameEnvVar, reversePInvokeExpectedName },
+                                            { PInvokeExpectedNameEnvVar, "TransitionsApp.dll!" + pInvokeExpectedName },
+                                            { ReversePInvokeExpectedNameEnvVar,  "TransitionsApp.dll!" + reversePInvokeExpectedName },
                                       }) == 100;
         }
         catch (Exception ex)

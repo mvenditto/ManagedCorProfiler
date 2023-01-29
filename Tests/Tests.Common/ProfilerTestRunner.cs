@@ -32,8 +32,7 @@ namespace Tests.Common
                 profilerName = "libProfiler.dylib";
             }
 
-            string profilerPath = Path.Combine(Environment.CurrentDirectory, "Profiler/" + profilerName);
-            Console.WriteLine($"Profiler path: {profilerPath}");
+            string profilerPath = Path.Combine(Environment.CurrentDirectory, @"Profiler\" + profilerName);
             return profilerPath;
         }
 
