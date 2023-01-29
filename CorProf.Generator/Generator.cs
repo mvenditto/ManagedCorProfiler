@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Collections.Generic;
 using Scriban;
 using CorProf.Generators;
+using System;
 
 namespace CorProf.Generator
 {
@@ -26,45 +27,82 @@ namespace CorProf.Generator
 
             var semanticModel = context.Compilation.GetSemanticModel(tree);
 
-            var profilerClass = tree
+            var profilerClasses = tree
                 .GetRoot()
                 .DescendantNodes()
-                .OfType<ClassDeclarationSyntax>()
-                .Where(cd => cd.DescendantNodes()
+                .OfType<ClassDeclarationSyntax>();
+
+            var profilers = new Dictionary<string, string>();
+
+            foreach (var profilerClass in profilerClasses)
+            {
+                var attribute = profilerClass.DescendantNodes()
                     .OfType<AttributeSyntax>()
-                    .Any(asy => semanticModel.GetTypeInfo(
-                        asy, context.CancellationToken).Type?.Name == "ProfilerCallbackAttribute"))
-                .FirstOrDefault();
+                    .FirstOrDefault(asy => semanticModel.GetTypeInfo(
+                        asy, context.CancellationToken).Type?.Name == "ProfilerCallbackAttribute");
 
-            if (profilerClass == null)
-            {
-                return;
-            }
+                if (attribute == null)
+                {
+                    continue;
+                }
 
-            var profilerClassSymbol = semanticModel.GetDeclaredSymbol(profilerClass);
+                var profilerGuid = attribute.ArgumentList?
+                    .Arguments
+                    .FirstOrDefault()?
+                    .NormalizeWhitespace()
+                    .ToFullString()
+                    .ToUpper();
 
-            if (profilerClassSymbol == null)
-            {
-                return;
-            }
+                if (profilerGuid == null)
+                {
+                    continue;
+                }
 
-            var className = profilerClassSymbol.Name;
+                Console.WriteLine($"{profilerGuid} -> {profilerClass.ToFullString()}");
 
-            var ns = profilerClassSymbol.ContainingNamespace;
+                // generate the Guid attribute for the profiler type using the guid
+                // provided to ProfilerCallbackAttribute
+                var name = SyntaxFactory.ParseName("Guid");
+                var arguments = SyntaxFactory.ParseAttributeArgumentList($"(\"{profilerGuid}\")");
+                var guidAttribute = SyntaxFactory.Attribute(name, arguments); 
+                var attributeList = new SeparatedSyntaxList<AttributeSyntax>();
+                attributeList = attributeList.Add(guidAttribute);
+                var list = SyntaxFactory.AttributeList(attributeList);
+                profilerClass.AttributeLists.Add(list);
 
-            var namespaces = new List<string>();
-            do
-            {
-                namespaces.Insert(0, ns.Name);
-                ns = ns?.ContainingNamespace;
-            }
-            while (ns != null);
 
-            var fullNamespace = namespaces.Aggregate((a, b) => $"{a}.{b}");
+                if (profilerClass == null)
+                {
+                    return;
+                }
 
-            if (fullNamespace.StartsWith("."))
-            {
-                fullNamespace = fullNamespace.Substring(1);
+                var profilerClassSymbol = semanticModel.GetDeclaredSymbol(profilerClass);
+
+                if (profilerClassSymbol == null)
+                {
+                    return;
+                }
+
+                var className = profilerClassSymbol.Name;
+
+                var ns = profilerClassSymbol.ContainingNamespace;
+
+                var namespaces = new List<string>();
+                do
+                {
+                    namespaces.Insert(0, ns.Name);
+                    ns = ns?.ContainingNamespace;
+                }
+                while (ns != null);
+
+                var fullNamespace = namespaces.Aggregate((a, b) => $"{a}.{b}");
+
+                if (fullNamespace.StartsWith("."))
+                {
+                    fullNamespace = fullNamespace.Substring(1);
+                }
+
+                profilers.Add(profilerGuid, fullNamespace + "." + className);
             }
 
             var templateSource = Helpers.GetEmbeddedContent("DllEntryPointExports.sbncs");
@@ -73,8 +111,8 @@ namespace CorProf.Generator
 
             var source = template.Render(new
             {
-                ProfilerNamespace = string.IsNullOrEmpty(fullNamespace) ? "DllExports" : fullNamespace,
-                ProfilerTypeName = className
+                ProfilerNamespace = "DllExports",
+                ProfilersMap = profilers
             });
 
             context.AddSource($"DllEntryPointExports.g.cs", source);

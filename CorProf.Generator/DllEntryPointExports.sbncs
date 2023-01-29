@@ -13,13 +13,29 @@ namespace {{ profiler_namespace }}
         [UnmanagedCallersOnly(EntryPoint = "DllGetClassObject")]
         public static unsafe int DllGetClassObject(Guid* rclsid, Guid* riid, IntPtr* ppv)
         {
+            var profGuid = *rclsid;
             var guid = *riid;
             if (guid == Guids.IID_IUnknown
              || guid == Guids.IID_IClassFactory)
             {
                 var cw = new ClassFactoryComWrappers();
 
-                var classFactory = new DefaultClassFactory(new {{ profiler_type_name }}());
+                object profilerInst = profGuid.ToString().ToUpper() switch
+                {
+        {{ for $p in profilers_map }}
+            {{ $p.key }} => new {{ $p.value }}(),
+        {{ end }}
+                   _ => null
+                };
+                
+                if (profilerInst == null)
+                {
+                    Console.WriteLine($"No registered profiler for GUID: <{profGuid}>");
+                    *ppv = IntPtr.Zero;
+                     return HResult.E_NOINTERFACE;
+                }
+
+                var classFactory = new DefaultClassFactory(profilerInst);
 
                 IntPtr ccwUnknown = cw.GetOrCreateComInterfaceForObject(
                     classFactory,
