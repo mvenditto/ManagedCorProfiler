@@ -16,26 +16,32 @@ namespace CorProf.Generator
     {
         public void Execute(GeneratorExecutionContext context)
         {
-            var tree = context.Compilation.SyntaxTrees.Where(
+            var trees = context.Compilation.SyntaxTrees.Where(
                 st => st.GetRoot()
                 .DescendantNodes()
                 .OfType<ClassDeclarationSyntax>()
-                .Any(p => p.DescendantNodes().OfType<AttributeSyntax>().Any()))
-                .FirstOrDefault();
+                .Any(p => p.DescendantNodes().OfType<AttributeSyntax>().Any()));
 
-            if (tree == null) return;
+            //var tree = trees.FirstOrDefault();
 
-            var semanticModel = context.Compilation.GetSemanticModel(tree);
+            //if (tree == null) return;
 
-            var profilerClasses = tree
-                .GetRoot()
-                .DescendantNodes()
-                .OfType<ClassDeclarationSyntax>();
+            var profilerClasses = trees.SelectMany(tree =>
+            {
+                var profilerClasses = tree
+                    .GetRoot()
+                    .DescendantNodes()
+                    .OfType<ClassDeclarationSyntax>();
+
+                return profilerClasses;
+            });
 
             var profilers = new Dictionary<string, string>();
 
             foreach (var profilerClass in profilerClasses)
             {
+                var semanticModel = context.Compilation.GetSemanticModel(profilerClass.SyntaxTree);
+
                 var attribute = profilerClass.DescendantNodes()
                     .OfType<AttributeSyntax>()
                     .FirstOrDefault(asy => semanticModel.GetTypeInfo(
