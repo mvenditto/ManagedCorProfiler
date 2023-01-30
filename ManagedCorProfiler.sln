@@ -23,17 +23,31 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{B6EE
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CorProf.Helpers", "CorProf.Helpers\CorProf.Helpers.csproj", "{2CB047C4-7BB6-409F-A680-3D493A294384}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Transitions", "Tests\Transitions\Profiler\Transitions.csproj", "{9EEE4C30-E383-4086-BAB8-BB94870FDA68}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestProfilers", "Tests\Transitions\Profiler\TestProfilers.csproj", "{9EEE4C30-E383-4086-BAB8-BB94870FDA68}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0CF4F019-2CBF-482A-9DC9-F6707179B932}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Transitions", "Transitions", "{52EE9611-63CE-4199-8DE7-ADA133F9BFF3}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Profiler", "Profiler", "{CCDB1F24-844F-4776-B5B5-E2C737BE0BDD}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Profilers", "Profilers", "{CCDB1F24-844F-4776-B5B5-E2C737BE0BDD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "App", "App", "{86D0F185-BB76-4C47-A402-AEC140560D38}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TransitionsApp", "Tests\Transitions\App\TransitionsApp.csproj", "{1087C1AB-772D-41DA-B764-33E809A1F717}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests.Common", "Tests\Tests.Common\Tests.Common.csproj", "{F3DC2759-2735-4F40-B30D-64E012F9BBA6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GCBasicProfiler", "GCBasicProfiler", "{0B8B6EDF-036B-4B49-9AEC-261AB5A2C61B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionFiles", "SolutionFiles", "{0AC75188-B752-4E3D-A3E6-3EFADA6F9802}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GCBasic", "Tests\GCBasic\GCBasic.csproj", "{E358CEDE-E91B-4FC4-B3AA-3E0696761E0A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -85,6 +99,14 @@ Global
 		{1087C1AB-772D-41DA-B764-33E809A1F717}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1087C1AB-772D-41DA-B764-33E809A1F717}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1087C1AB-772D-41DA-B764-33E809A1F717}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3DC2759-2735-4F40-B30D-64E012F9BBA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3DC2759-2735-4F40-B30D-64E012F9BBA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3DC2759-2735-4F40-B30D-64E012F9BBA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3DC2759-2735-4F40-B30D-64E012F9BBA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E358CEDE-E91B-4FC4-B3AA-3E0696761E0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E358CEDE-E91B-4FC4-B3AA-3E0696761E0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E358CEDE-E91B-4FC4-B3AA-3E0696761E0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E358CEDE-E91B-4FC4-B3AA-3E0696761E0A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -95,6 +117,9 @@ Global
 		{CCDB1F24-844F-4776-B5B5-E2C737BE0BDD} = {52EE9611-63CE-4199-8DE7-ADA133F9BFF3}
 		{86D0F185-BB76-4C47-A402-AEC140560D38} = {52EE9611-63CE-4199-8DE7-ADA133F9BFF3}
 		{1087C1AB-772D-41DA-B764-33E809A1F717} = {86D0F185-BB76-4C47-A402-AEC140560D38}
+		{F3DC2759-2735-4F40-B30D-64E012F9BBA6} = {0CF4F019-2CBF-482A-9DC9-F6707179B932}
+		{0B8B6EDF-036B-4B49-9AEC-261AB5A2C61B} = {0CF4F019-2CBF-482A-9DC9-F6707179B932}
+		{E358CEDE-E91B-4FC4-B3AA-3E0696761E0A} = {86D0F185-BB76-4C47-A402-AEC140560D38}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {33D9E3AF-5810-41DD-9EEE-1E09B5B8ECB4}
