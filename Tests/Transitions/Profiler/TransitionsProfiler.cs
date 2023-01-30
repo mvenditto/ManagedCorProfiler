@@ -51,28 +51,6 @@ namespace Transitions
 
         int ICorProfilerCallback.Initialize(IUnknown* unknown)
         {
-            /*
-            ShutdownGuard.Initialize();
-
-            Console.WriteLine("Profiler.dll!Profiler::Initialize");
-            Console.Out.Flush();
-
-            var guid_ = CorProfConsts.IID_ICorProfilerInfo5;
-
-            var hr = Marshal.QueryInterface((nint)unknown, ref guid_, out var pinfo);
-
-            if (hr < 0)
-            {
-                Console.WriteLine($"Failed to get ICorProfilerInfo11 with hr=0x{hr:x8}");
-                return HResult.E_FAIL;
-            }
-
-            _profilerInfo = (ICorProfilerInfo11*)pinfo;
-
-            _profilerInfoHelpers = new ICorProfilerInfoHelpers2(
-                (ICorProfilerInfo2*)pinfo);
-            */
-
             base.Initialize(unknown);
 
             var eventsLow = COR_PRF_MONITOR.COR_PRF_MONITOR_CODE_TRANSITIONS
@@ -190,13 +168,6 @@ namespace Transitions
 
         int ICorProfilerCallback.Shutdown()
         {
-            /*
-            Console.WriteLine("Profiler.dll!Profiler::Shutdown");
-            Console.Out.Flush();
-
-            // Wait for any in progress profiler callbacks to finish.
-            ShutdownGuard.WaitForInProgressHooks();
-                */
             base.Shutdown();
 
             bool successPinvoke = _pinvoke.ManagedToUnmanaged == COR_PRF_TRANSITION_CALL
