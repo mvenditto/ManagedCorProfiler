@@ -1,6 +1,5 @@
 ﻿using CorProf.Bindings;
 using CorProf.Core;
-using CorProf.Helpers;
 using CorProf.Shared;
 using Microsoft.Diagnostics.Runtime.Utilities;
 using System.Runtime.InteropServices;
@@ -9,14 +8,15 @@ using ICorProfilerCallback = CorProf.Core.Interfaces.ICorProfilerCallback;
 using ICorProfilerCallback2 = CorProf.Core.Interfaces.ICorProfilerCallback2;
 
 using static CorProf.Bindings.COR_PRF_TRANSITION_REASON;
+using TestProfilers;
 
 namespace Transitions
 {
     [ProfilerCallback("090B7720-6605-462B-86A0-C4D4C444D3F5")]
-    internal unsafe class TransitionsProfiler : ICorProfilerCallback2
+    internal unsafe class TransitionsProfiler: TestProfilerBase, ICorProfilerCallback2
     {
-        private ICorProfilerInfo11* _profilerInfo;
-        private ICorProfilerInfoHelpers2 _profilerInfoHelpers;
+        //private ICorProfilerInfo11* _profilerInfo;
+        //private ICorProfilerInfoHelpers2 _profilerInfoHelpers;
 
         private string _expectedPinvokeName;
         private string _expectedReversePInvokeName;
@@ -51,10 +51,10 @@ namespace Transitions
 
         int ICorProfilerCallback.Initialize(IUnknown* unknown)
         {
+            /*
             ShutdownGuard.Initialize();
 
             Console.WriteLine("Profiler.dll!Profiler::Initialize");
-
             Console.Out.Flush();
 
             var guid_ = CorProfConsts.IID_ICorProfilerInfo5;
@@ -71,11 +71,14 @@ namespace Transitions
 
             _profilerInfoHelpers = new ICorProfilerInfoHelpers2(
                 (ICorProfilerInfo2*)pinfo);
+            */
+
+            base.Initialize(unknown);
 
             var eventsLow = COR_PRF_MONITOR.COR_PRF_MONITOR_CODE_TRANSITIONS
                 | COR_PRF_MONITOR.COR_PRF_DISABLE_INLINING;
 
-            hr = _profilerInfo->SetEventMask2((uint)eventsLow, 0);
+            int hr = _profilerInfo->SetEventMask2((uint)eventsLow, 0);
 
             if (hr < 0)
             {
@@ -187,13 +190,15 @@ namespace Transitions
 
         int ICorProfilerCallback.Shutdown()
         {
-
+            /*
             Console.WriteLine("Profiler.dll!Profiler::Shutdown");
             Console.Out.Flush();
 
             // Wait for any in progress profiler callbacks to finish.
             ShutdownGuard.WaitForInProgressHooks();
-                
+                */
+            base.Shutdown();
+
             bool successPinvoke = _pinvoke.ManagedToUnmanaged == COR_PRF_TRANSITION_CALL
                     && _pinvoke.UnmanagedToManaged == COR_PRF_TRANSITION_RETURN;
 
