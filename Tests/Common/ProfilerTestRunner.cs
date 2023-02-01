@@ -32,7 +32,9 @@ namespace Tests.Common
                 profilerName = "libProfiler.dylib";
             }
 
-            string profilerPath = Path.Combine(Environment.CurrentDirectory, @"Profiler\" + profilerName);
+            string profilerPath = Path.Combine(
+                Path.GetFullPath(@"..\..\..\..\Profilers\bin\profiler\"), 
+                profilerName);
             return profilerPath;
         }
 
@@ -80,6 +82,10 @@ namespace Tests.Common
             arguments = profileePath + " RunTest " + profileeArguments;
             program = GetCorerunPath();
             string profilerPath = GetProfilerPath();
+            
+            envVars.Add("COMPlus_LogEnable", "1");
+            envVars.Add("COMPlus_LogLevel", "3");
+            envVars.Add("COMPlus_LogToConsole", "1");
 
             if (!profileeOptions.HasFlag(ProfileeOptions.NoStartupAttach))
             {

@@ -130,8 +130,8 @@ unsafe class Transitions
                                       profileeArguments: testName,
                                       envVars: new Dictionary<string, string>
                                       {
-                                            { PInvokeExpectedNameEnvVar, "TransitionsApp.dll!" + pInvokeExpectedName },
-                                            { ReversePInvokeExpectedNameEnvVar,  "TransitionsApp.dll!" + reversePInvokeExpectedName },
+                                            { PInvokeExpectedNameEnvVar, "Transitions.dll!" + pInvokeExpectedName },
+                                            { ReversePInvokeExpectedNameEnvVar,  "Transitions.dll!" + reversePInvokeExpectedName },
                                       }) == 100;
         }
         catch (Exception ex)

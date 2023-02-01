@@ -21,6 +21,7 @@ include/
 
 # Mono auto generated files
 mono_crash.*
+Tests/**/launchSettings.json
 
 # Build results
 [Dd]ebug/

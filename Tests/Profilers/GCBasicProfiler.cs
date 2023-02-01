@@ -3,7 +3,6 @@ using CorProf.Core;
 using CorProf.Helpers;
 using CorProf.Shared;
 using Microsoft.Diagnostics.Runtime.Utilities;
-using System.Runtime.InteropServices;
 using ICorProfilerCallback = CorProf.Core.Interfaces.ICorProfilerCallback;
 using ICorProfilerCallback2 = CorProf.Core.Interfaces.ICorProfilerCallback2;
 
@@ -77,7 +76,8 @@ namespace TestProfilers
 
                 if (pObjectRanges == null)
                 {
-                    pObjectRanges = NativeBuffer<COR_PRF_GC_GENERATION_RANGE>.Alloc(nObjectRanges);
+                    using var buff = NativeBuffer<COR_PRF_GC_GENERATION_RANGE>.Alloc(nObjectRanges);
+                    pObjectRanges = buff;
                 }
 
                 fHeapAlloc = true;
