@@ -5,7 +5,7 @@ using Tests.Common;
 
 namespace Profiler.Tests
 {
-    class GCAllocateTests
+    public class GCAllocateTests
     {
         static readonly Guid GcAllocateEventsProfilerGuid = new Guid("55b9554d-6115-45a2-be1e-c80f7fa35369");
 

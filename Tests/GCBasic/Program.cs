@@ -5,7 +5,7 @@ using Tests.Common;
 
 namespace Profiler.Tests
 {
-    class GCBasicTests
+    public class GCBasicTests
     {
         static readonly Guid GcBasicEventsProfilerGuid = new Guid("A040B953-EDE7-42D9-9077-AA69BB2BE024");
 

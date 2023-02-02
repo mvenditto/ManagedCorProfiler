@@ -7,7 +7,8 @@ using Tests.Common;
 ///     System.Private.CoreLib.dll!EtwEnableCallback::Invoke
 /// that would mess the test
 /// </summary>
-unsafe class Transitions
+
+public unsafe class Transitions
 {
     static readonly string PInvokeExpectedNameEnvVar = "PInvoke_Transition_Expected_Name";
     static readonly string ReversePInvokeExpectedNameEnvVar = "ReversePInvoke_Transition_Expected_Name";
@@ -110,7 +111,6 @@ unsafe class Transitions
         {
             return 101;
         }
-        
 
         if (!RunProfilerTest(nameof(NonBlittablePInvokeToNonBlittableInteropDelegate), "Transitions::" + nameof(DoPInvokeNonBlitable), "InteropDelegateNonBlittable::Invoke"))
         {

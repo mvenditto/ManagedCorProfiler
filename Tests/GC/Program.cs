@@ -25,7 +25,7 @@ namespace Profiler.Tests
         }
     }
 
-    class GCTests
+    public class GCTests
     {
         static readonly Guid GCProfilerGuid = new Guid("BCD8186F-1EEC-47E9-AFA7-396F879382C3");
 
