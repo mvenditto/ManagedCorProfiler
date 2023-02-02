@@ -40,20 +40,6 @@ namespace TestProfilers
             return HResult.S_OK;
         }
 
-        int ICorProfilerCallback2.GarbageCollectionStarted(int cGenerations, int* generationCollected, CorProf.Bindings.COR_PRF_GC_REASON reason)
-        {
-            using var _ = new ShutdownGuard();
-
-            if (ShutdownGuard.HasShutdownStarted())
-            {
-                return HResult.S_OK;
-            }
-
-           
-
-            return HResult.S_OK;
-        }
-
         int ICorProfilerCallback.ObjectAllocated(ulong objectId, ulong classId)
         {
             using var _ = new ShutdownGuard();
