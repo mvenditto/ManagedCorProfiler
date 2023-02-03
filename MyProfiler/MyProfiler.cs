@@ -2,17 +2,13 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-
 using CorProf.Bindings;
 using CorProf.Core;
 using CorProf.Utilities;
-
-using ICorProfilerCallback = CorProf.Core.Interfaces.ICorProfilerCallback;
-using ICorProfilerCallback2 = CorProf.Core.Interfaces.ICorProfilerCallback2;
-
+using CorProf.Core.Abstractions;
 
 [ProfilerCallback("cf0d821e-299b-5307-a3d8-b283c03916dd")]
-internal unsafe class MyProfiler : ICorProfilerCallback2
+internal unsafe class MyProfiler : CorProfilerCallback2
 {
     private ICorProfilerInfo2* _profilerInfo;
 
@@ -154,7 +150,7 @@ internal unsafe class MyProfiler : ICorProfilerCallback2
     }
     #endregion
 
-    int ICorProfilerCallback.Initialize(CorProf.Bindings.IUnknown* unknown)
+    public override int Initialize(CorProf.Bindings.IUnknown* unknown)
     {
         Console.Write("MyProfiler!Initialize");
 
@@ -227,14 +223,14 @@ internal unsafe class MyProfiler : ICorProfilerCallback2
         return HResult.S_OK;
     }
 
-    int ICorProfilerCallback.Shutdown() 
+    public override int Shutdown() 
     {
         NativeMemory.Free(EnterLeaveCallbacks);
         NativeMethods.FreeLibrary(HooksLib);
         return HResult.S_OK; 
     }
 
-    int ICorProfilerCallback.ModuleLoadFinished(ulong moduleId, int hrStatus)
+    public override int ModuleLoadFinished(ulong moduleId, int hrStatus)
     {
         Console.WriteLine($"ICorProfilerCallback!ModuleLoadFinished(0x{moduleId:X8})");
 
