@@ -108,7 +108,11 @@ namespace CorProf.Generator
                     fullNamespace = fullNamespace.Substring(1);
                 }
 
-                profilers.Add(profilerGuid, fullNamespace + "." + className);
+                var fullClassName = string.IsNullOrEmpty(fullNamespace)
+                    ? className
+                    : fullNamespace + "." + className;
+
+                profilers.Add(profilerGuid, fullClassName);
             }
 
             var templateSource = Helpers.GetEmbeddedContent("DllEntryPointExports.sbncs");
