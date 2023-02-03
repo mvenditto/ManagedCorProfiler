@@ -3,19 +3,17 @@ using CorProf.Core;
 using CorProf.Helpers;
 using CorProf.Shared;
 using Microsoft.Diagnostics.Runtime.Utilities;
-using ICorProfilerCallback = CorProf.Core.Interfaces.ICorProfilerCallback;
-using ICorProfilerCallback2 = CorProf.Core.Interfaces.ICorProfilerCallback2;
 
 namespace TestProfilers
 {
     [ProfilerCallback("A040B953-EDE7-42D9-9077-AA69BB2BE024")]
-    internal unsafe class GCBasicProfiler : TestProfilerBase, ICorProfilerCallback2
+    internal unsafe class GCBasicProfiler : TestProfiler
     {
         private int _gcStarts = 0;
         private int _gcFinishes = 0;
         private int _gcFailures = 0;
 
-        int ICorProfilerCallback.Initialize(IUnknown* unknown)
+        public override int Initialize(IUnknown* unknown)
         {
             base.Initialize(unknown);
 
@@ -32,7 +30,7 @@ namespace TestProfilers
             return HResult.S_OK;
         }
 
-        int ICorProfilerCallback2.GarbageCollectionStarted(int cGenerations, int* generationCollected, CorProf.Bindings.COR_PRF_GC_REASON reason)
+        public override int GarbageCollectionStarted(int cGenerations, int* generationCollected, CorProf.Bindings.COR_PRF_GC_REASON reason)
         {
             using var _ = new ShutdownGuard();
 
@@ -121,7 +119,7 @@ namespace TestProfilers
             return HResult.S_OK;
         }
 
-        int ICorProfilerCallback2.GarbageCollectionFinished()
+        public override int GarbageCollectionFinished()
         {
             using var _ = new ShutdownGuard();
 
@@ -142,7 +140,7 @@ namespace TestProfilers
             return HResult.S_OK;
         }
 
-        int ICorProfilerCallback.Shutdown()
+        public override int Shutdown()
         {
             base.Shutdown();
 

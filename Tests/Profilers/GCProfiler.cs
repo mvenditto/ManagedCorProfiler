@@ -4,15 +4,12 @@ using CorProf.Shared;
 using Microsoft.Diagnostics.Runtime.Utilities;
 using System.Collections.Concurrent;
 
-using ICorProfilerCallback = CorProf.Core.Interfaces.ICorProfilerCallback;
-using ICorProfilerCallback2 = CorProf.Core.Interfaces.ICorProfilerCallback2;
-
 using static CorProf.Bindings.COR_PRF_MONITOR;
 
 namespace TestProfilers
 {
     [ProfilerCallback("BCD8186F-1EEC-47E9-AFA7-396F879382C3")]
-    internal unsafe class GCProfiler : TestProfilerBase, ICorProfilerCallback2
+    internal unsafe class GCProfiler : TestProfiler
     {
         private int _gcStarts;
         private int _gcFinishes;
@@ -23,7 +20,7 @@ namespace TestProfilers
         private ConcurrentDictionary<ulong, object> _rootReferencesSeen = new();
         private ConcurrentDictionary<ulong, object> _objectReferencesSeen = new();
 
-        int ICorProfilerCallback.Initialize(IUnknown* unknown)
+        public override int Initialize(IUnknown* unknown)
         {
             base.Initialize(unknown);
 
@@ -64,7 +61,7 @@ namespace TestProfilers
             return count;
         }
 
-        int ICorProfilerCallback2.GarbageCollectionStarted(int cGenerations, int* generationCollected, CorProf.Bindings.COR_PRF_GC_REASON reason)
+        public override int GarbageCollectionStarted(int cGenerations, int* generationCollected, CorProf.Bindings.COR_PRF_GC_REASON reason)
         {
             using var _ = new ShutdownGuard();
 
@@ -91,7 +88,7 @@ namespace TestProfilers
             return HResult.S_OK;
         }
 
-        int ICorProfilerCallback2.GarbageCollectionFinished()
+        public override int GarbageCollectionFinished()
         {
             using var _ = new ShutdownGuard();
 
@@ -115,7 +112,7 @@ namespace TestProfilers
             return HResult.S_OK;
         }
 
-        int ICorProfilerCallback.ObjectsAllocatedByClass(uint cClassCount, ulong* classIds, uint* cObjects)
+        public override int ObjectsAllocatedByClass(uint cClassCount, ulong* classIds, uint* cObjects)
         {
             using var _ = new ShutdownGuard();
 
@@ -138,7 +135,7 @@ namespace TestProfilers
             return HResult.S_OK;
         }
 
-        int ICorProfilerCallback.ObjectReferences(ulong objectId, ulong classId, uint cObjectRefs, ulong* objectRefIds)
+        public override int ObjectReferences(ulong objectId, ulong classId, uint cObjectRefs, ulong* objectRefIds)
         {
             using var _ = new ShutdownGuard();
 
@@ -160,7 +157,7 @@ namespace TestProfilers
             return HResult.S_OK; 
         }
 
-        int ICorProfilerCallback.RootReferences(uint cRootRefs, ulong* rootRefIds) 
+        public override int RootReferences(uint cRootRefs, ulong* rootRefIds) 
         {
             using var _ = new ShutdownGuard();
 
@@ -182,7 +179,7 @@ namespace TestProfilers
             return HResult.S_OK;
         }
 
-        int ICorProfilerCallback.Shutdown()
+        public override int Shutdown()
         {
             base.Shutdown();
 

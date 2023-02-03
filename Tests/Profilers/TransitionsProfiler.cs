@@ -3,17 +3,12 @@ using CorProf.Core;
 using CorProf.Shared;
 using Microsoft.Diagnostics.Runtime.Utilities;
 using System.Runtime.InteropServices;
-
-using ICorProfilerCallback = CorProf.Core.Interfaces.ICorProfilerCallback;
-using ICorProfilerCallback2 = CorProf.Core.Interfaces.ICorProfilerCallback2;
-
 using static CorProf.Bindings.COR_PRF_TRANSITION_REASON;
-using TestProfilers;
 
-namespace Transitions
+namespace TestProfilers
 {
     [ProfilerCallback("090B7720-6605-462B-86A0-C4D4C444D3F5")]
-    internal unsafe class TransitionsProfiler: TestProfilerBase, ICorProfilerCallback2
+    internal unsafe class TransitionsProfiler: TestProfiler
     {
         //private ICorProfilerInfo11* _profilerInfo;
         //private ICorProfilerInfoHelpers2 _profilerInfoHelpers;
@@ -49,7 +44,7 @@ namespace Transitions
             Console.WriteLine($"PInvoke received i={callback(i)}");
         }
 
-        int ICorProfilerCallback.Initialize(IUnknown* unknown)
+        public override int Initialize(IUnknown* unknown)
         {
             base.Initialize(unknown);
 
@@ -112,7 +107,7 @@ namespace Transitions
             return true;
         }
 
-        int ICorProfilerCallback.ManagedToUnmanagedTransition(ulong functionId, COR_PRF_TRANSITION_REASON reason)
+        public override int ManagedToUnmanagedTransition(ulong functionId, COR_PRF_TRANSITION_REASON reason)
         {
             using var _ = new ShutdownGuard();
 
@@ -139,7 +134,7 @@ namespace Transitions
             return HResult.S_OK;
         }
 
-        int ICorProfilerCallback.UnmanagedToManagedTransition(ulong functionId, COR_PRF_TRANSITION_REASON reason)
+        public override int UnmanagedToManagedTransition(ulong functionId, COR_PRF_TRANSITION_REASON reason)
         {
             using var _ = new ShutdownGuard();
 
@@ -166,7 +161,7 @@ namespace Transitions
             return HResult.S_OK;
         }
 
-        int ICorProfilerCallback.Shutdown()
+        public override int Shutdown()
         {
             base.Shutdown();
 

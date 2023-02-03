@@ -3,24 +3,20 @@ using CorProf.Core;
 using CorProf.Shared;
 using Microsoft.Diagnostics.Runtime.Utilities;
 
-using ICorProfilerCallback = CorProf.Core.Interfaces.ICorProfilerCallback;
-using ICorProfilerCallback2 = CorProf.Core.Interfaces.ICorProfilerCallback2;
-
 using static CorProf.Bindings.COR_PRF_MONITOR;
 using static CorProf.Bindings.COR_PRF_HIGH_MONITOR;
 using static CorProf.Bindings.COR_PRF_GC_GENERATION;
-using System.Threading;
 
 namespace TestProfilers
 {
     [ProfilerCallback("55b9554d-6115-45a2-be1e-c80f7fa35369")]
-    internal unsafe class GCAllocationsProfiler : TestProfilerBase, ICorProfilerCallback2
+    internal unsafe class GCAllocationsProfiler : TestProfiler
     {
         private int _gcLOHAllocations = 0;
         private int _gcPOHAllocations = 0;
         private int _failures = 0;
 
-        int ICorProfilerCallback.Initialize(IUnknown* unknown)
+        public override int Initialize(IUnknown* unknown)
         {
             base.Initialize(unknown);
 
@@ -40,7 +36,7 @@ namespace TestProfilers
             return HResult.S_OK;
         }
 
-        int ICorProfilerCallback.ObjectAllocated(ulong objectId, ulong classId)
+        public override int ObjectAllocated(ulong objectId, ulong classId)
         {
             using var _ = new ShutdownGuard();
 
@@ -75,7 +71,7 @@ namespace TestProfilers
             return HResult.S_OK;
         }
 
-        int ICorProfilerCallback.Shutdown()
+        public override int Shutdown()
         {
             base.Shutdown();
 

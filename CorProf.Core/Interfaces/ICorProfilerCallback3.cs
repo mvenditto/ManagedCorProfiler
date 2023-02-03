@@ -6,10 +6,10 @@ namespace CorProf.Core.Interfaces
     public unsafe interface ICorProfilerCallback3 : ICorProfilerCallback, ICorProfilerCallback2
     {
         [VtblIndex(80)]
-        int InitializeForAttach(IUnknown* pCorProfilerInfoUnk, void* pvClientData, uint cbClientData) { return HResult.S_OK; }
+        int InitializeForAttach(IUnknown* pCorProfilerInfoUnk, void* pvClientData, uint cbClientData);
         [VtblIndex(81)]
-        int ProfilerAttachComplete() { return HResult.S_OK; }
+        int ProfilerAttachComplete();
         [VtblIndex(82)]
-        int ProfilerDetachSucceeded() { return HResult.S_OK; }
+        int ProfilerDetachSucceeded();
     }
 }

@@ -1,16 +1,17 @@
 ﻿using CorProf.Bindings;
+using CorProf.Core.Abstractions;
 using CorProf.Helpers;
 using CorProf.Shared;
 using System.Runtime.InteropServices;
 
 namespace TestProfilers
 {
-    internal abstract unsafe class TestProfilerBase
+    internal abstract unsafe class TestProfiler: CorProfilerCallback2
     {
         protected ICorProfilerInfo11* _profilerInfo;
         protected ICorProfilerInfoHelpers2 _profilerInfoHelpers;
 
-        protected int Initialize(IUnknown* unknown)
+        public override int Initialize(IUnknown* unknown)
         {
             ShutdownGuard.Initialize();
 
@@ -37,7 +38,7 @@ namespace TestProfilers
             return 0;
         }
 
-        protected int Shutdown()
+        public override int Shutdown()
         {
             Console.WriteLine("Profiler.dll!Profiler::Shutdown");
             Console.Out.Flush();
