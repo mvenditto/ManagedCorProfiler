@@ -7,14 +7,14 @@
 
         public static bool HasShutdownStarted()
         {
-            return _preventHooks == 1;
+            return Interlocked.CompareExchange(ref _preventHooks, 0, 0) == 1;
         }
 
         public static void WaitForInProgressHooks()
         {
             Interlocked.Exchange(ref _preventHooks, 1);
 
-            while (_hooksInProgress > 0)
+            while (Interlocked.CompareExchange(ref _hooksInProgress, 0, 0) > 0)
             {
                 Thread.Sleep(10);
             }
@@ -22,8 +22,8 @@
 
         public static void Initialize()
         {
-            _preventHooks = 0;
-            _hooksInProgress = 0;
+            Interlocked.Exchange(ref _preventHooks, 0);
+            Interlocked.Exchange(ref _hooksInProgress, 0);
         }
 
         public ShutdownGuard()
