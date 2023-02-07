@@ -20,8 +20,9 @@ In order to run tests it is necessary:
 ## Test Profilers
 | name | id |
 | ---- | -- |
-| transitions | `090B7720-6605-462B-86A0-C4D4C444D3F5` |
+| Transitions | `090B7720-6605-462B-86A0-C4D4C444D3F5` |
 | GCBasic | `A040B953-EDE7-42D9-9077-AA69BB2BE024` |
 | GCAllocations | `55b9554d-6115-45a2-be1e-c80f7fa35369` |
 | GC | `BCD8186F-1EEC-47E9-AFA7-396F879382C3` |
+| Inlining | `DDADC0CB-21C8-4E53-9A6C-7C65EE5800CE` |
 | 🚧🚧🚧 | |
