@@ -20,6 +20,7 @@
     <ProjectReference Include="..\..\CorProf.Generator\CorProf.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\..\CorProf.Core\CorProf.Core.csproj" />
     <ProjectReference Include="..\..\CorProf.Helpers\CorProf.Helpers.csproj" />
+    <ProjectReference Include="..\Common\Tests.Common.csproj" />
   </ItemGroup>
 
 </Project>

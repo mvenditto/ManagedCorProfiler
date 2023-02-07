@@ -16,6 +16,13 @@ namespace Tests.Common
         NoStartupAttach,
         ReverseDiagnosticsMode
     }
+    
+    public interface IOutputHelper
+    {
+        void WriteLine(string message);
+
+        void WriteLine(string format, params object[] args);
+    }
 
     public static class ProfilerTestRunner
     {
@@ -35,8 +42,12 @@ namespace Tests.Common
                 profilerName = "libProfiler.dylib";
             }
 
+            var currDir = Environment.CurrentDirectory;
+
+            Console.WriteLine(currDir);
+
             string profilerPath = Path.Combine(
-                Path.GetFullPath(@"..\..\..\..\Profilers\bin\profiler\"), 
+                Path.GetFullPath(@"..\..\..\..\Profilers\bin\profiler\"),
                 profilerName);
             return profilerPath;
         }
@@ -71,7 +82,8 @@ namespace Tests.Common
             Dictionary<string, string> envVars = null,
             string reverseServerName = null,
             bool loadAsNotification = false,
-            int notificationCopies = 1)
+            int notificationCopies = 1,
+            IOutputHelper outputHelper = null)
         {
             string arguments;
             string program;
@@ -86,6 +98,11 @@ namespace Tests.Common
             program = GetCorerunPath();
             string profilerPath = GetProfilerPath();
             
+            if (!Path.Exists(profilerPath))
+            {
+                throw new ArgumentException("Cannot locate profiler dll.");
+            }
+
             envVars.Add("COMPlus_LogEnable", "1");
             envVars.Add("COMPlus_LogLevel", "3");
             envVars.Add("COMPlus_LogToConsole", "1");
@@ -165,6 +182,7 @@ namespace Tests.Common
             process.OutputDataReceived += (sender, args) =>
             {
                 Console.WriteLine(args.Data);
+                outputHelper?.WriteLine(args.Data);
                 verifier.WriteLine(args.Data);
             };
             process.Start();
