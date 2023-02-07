@@ -8,7 +8,6 @@ typedef struct EnterLeaveCallbacks3WithInfo {
     FunctionEnter3WithInfo* Enter;
     FunctionLeave3WithInfo* Leave;
     FunctionTailcall3WithInfo* Tailcall;
-    void* userData;
 } EnterLeaveCallbacks3WithInfo;
 
 static EnterLeaveCallbacks3WithInfo* UserCallbacks;
@@ -22,35 +21,31 @@ EXTERN_C void __stdcall TailcallStub(
     FunctionIDOrClientID functionIDOrClientID,
     COR_PRF_ELT_INFO eltInfo)
 {
-    //printf("> tail\n");
+    //printf("> tail %lld\n", functionIDOrClientID.functionID);
     UserCallbacks->Tailcall(functionIDOrClientID, eltInfo);
-    //printf("< tail\n");
+    //printf("< tail %lld\n", functionIDOrClientID.functionID);
 }
 
 EXTERN_C void __stdcall EnterStub(
     FunctionIDOrClientID functionIDOrClientID,
     COR_PRF_ELT_INFO eltInfo)
 {
-    //printf("> enter\n");
+    //printf("> enter %lld\n", functionIDOrClientID.functionID);
     UserCallbacks->Enter(functionIDOrClientID, eltInfo);
-    //printf("< enter\n");
+    //printf("< enter %lld\n", functionIDOrClientID.functionID);
 }
 
 EXTERN_C void __stdcall LeaveStub(
     FunctionIDOrClientID functionIDOrClientID,
     COR_PRF_ELT_INFO eltInfo)
 {
-    //printf("< leave\n");
+    //printf("> leave %lld\n", functionIDOrClientID.functionID);
     UserCallbacks->Leave(functionIDOrClientID, eltInfo);
-    //printf("< leave\n");
+    //printf("< leave %lld\n", functionIDOrClientID.functionID);
 }
 
 #ifdef _X86_
 
-/*
-The implementation must use the __declspec(naked) storage-class attribute.
-see: https://learn.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/functionenter2-function
-*/
 __declspec(naked) void __stdcall EnterNaked3WithInfo(
     FunctionIDOrClientID functionIDOrClientID,
     COR_PRF_ELT_INFO eltInfo)
@@ -61,7 +56,7 @@ __declspec(naked) void __stdcall EnterNaked3WithInfo(
         PUSH ECX
         PUSH EDX
         PUSH[ESP + 16]
-        CALL LeaveStub
+        CALL EnterStub
         POP EDX
         POP ECX
         POP EAX
@@ -97,7 +92,7 @@ __declspec(naked)  void __stdcall TailcallNaked3WithInfo(
         PUSH ECX
         PUSH EDX
         PUSH[ESP + 16]
-        CALL LeaveStub
+        CALL TailcallStub
         POP EDX
         POP ECX
         POP EAX

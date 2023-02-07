@@ -13,7 +13,7 @@ using static CorProf.Bindings.COR_PRF_MONITOR;
 namespace TestProfilers
 {
     [ProfilerCallback("DDADC0CB-21C8-4E53-9A6C-7C65EE5800CE")]
-    internal unsafe class InliningProfiler: TestProfiler
+    public unsafe class InliningProfiler: TestProfiler
     {
         private static int _failures;
 
@@ -142,13 +142,13 @@ namespace TestProfilers
                                                     | COR_PRF_ENABLE_FRAME_INFO
                                                     | COR_PRF_MONITOR_JIT_COMPILATION), 
                                                     0);
+            Console.WriteLine("LOAD HOOKS");
             if (hr < 0)
             {
                 Console.WriteLine($"FAIL: IpCorProfilerInfo::SetEventMask2() failed hr=0x{hr:x8}");
                 _failures++;
                 return hr;
             }
-
             var hooksLibPath = Path.GetFullPath(@"..\..\..\..\Profilers\bin\profiler\hooks.dll");
             Console.WriteLine(hooksLibPath);
             EnterLeaveHooks3WithInfo.Initialize(hooksLibPath);
@@ -175,6 +175,13 @@ namespace TestProfilers
 
         public override unsafe int JITInlining(ulong callerId, ulong calleeId, int* pfShouldInline)
         {
+            using var shutdownGuard = new ShutdownGuard();
+
+            if (ShutdownGuard.HasShutdownStarted())
+            {
+                return HResult.S_OK;
+            }
+
             Console.WriteLine("JITInlining");
 
             int hr = _profilerInfoHelpers.GetFunctionIDName(
@@ -232,7 +239,7 @@ namespace TestProfilers
 
             Console.Out.Flush();
 
-            EnterLeaveHooks3WithInfo.Cleanup();
+            // EnterLeaveHooks3WithInfo.Cleanup();
 
             return HResult.S_OK;
         }
