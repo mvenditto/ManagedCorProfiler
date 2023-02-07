@@ -48,7 +48,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GC", "Tests\GC\GC.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "Tests\Tests\Tests.csproj", "{A2927321-A8B7-4982-9D35-05D2FE9EFEC8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inlining", "Tests\Inlining\Inlining.csproj", "{9EB1B12F-DE95-47F7-AB2C-8FBFDB0D3C5C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Inlining", "Tests\Inlining\Inlining.csproj", "{9EB1B12F-DE95-47F7-AB2C-8FBFDB0D3C5C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CorProf.Hooks", "CorProf.Hooks\CorProf.Hooks.csproj", "{2E0CA6A2-F423-45F3-B76F-6CA9D25386DC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -124,6 +126,10 @@ Global
 		{9EB1B12F-DE95-47F7-AB2C-8FBFDB0D3C5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9EB1B12F-DE95-47F7-AB2C-8FBFDB0D3C5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9EB1B12F-DE95-47F7-AB2C-8FBFDB0D3C5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E0CA6A2-F423-45F3-B76F-6CA9D25386DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E0CA6A2-F423-45F3-B76F-6CA9D25386DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E0CA6A2-F423-45F3-B76F-6CA9D25386DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E0CA6A2-F423-45F3-B76F-6CA9D25386DC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

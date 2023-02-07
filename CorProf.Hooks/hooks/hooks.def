@@ -1,0 +1,16 @@
+EXPORTS
+SetEnterLeaveCallbacks2
+EnterStub2
+LeaveStub2
+TailcallStub2
+EnterNaked2
+LeaveNaked2
+TailcallNaked2
+
+SetEnterLeaveCallbacks3WithInfo
+EnterNaked3WithInfo
+LeaveNaked3WithInfo
+TailcallNaked3WithInfo
+EnterStub3WithInfo
+LeaveStub3WithInfo
+TailcallStub3WithInfo
