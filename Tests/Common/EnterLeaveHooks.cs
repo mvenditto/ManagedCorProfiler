@@ -1,5 +1,6 @@
 ﻿using CorProf.Bindings;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Tests.Common
 {

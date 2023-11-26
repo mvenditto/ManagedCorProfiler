@@ -3,13 +3,12 @@ using CorProf.Core;
 using CorProf.Shared;
 using Microsoft.Diagnostics.Runtime.Utilities;
 using System.Collections.Concurrent;
-
 using static CorProf.Bindings.COR_PRF_MONITOR;
 
 namespace TestProfilers
 {
     [ProfilerCallback("BCD8186F-1EEC-47E9-AFA7-396F879382C3")]
-    internal unsafe class GCProfiler : TestProfiler
+    internal unsafe class GCProfiler : TestProfilerBase
     {
         private int _gcStarts;
         private int _gcFinishes;
@@ -43,9 +42,9 @@ namespace TestProfilers
             foreach(ulong objectId in objects)
             {
                 COR_PRF_GC_GENERATION_RANGE gen;
-                
+            
                 hr = _profilerInfo->GetObjectGeneration(objectId, &gen);
-                
+            
                 if (hr < 0)
                 {
                     Console.WriteLine($"GetObjectGeneration failed hr=0x{hr:x8}");

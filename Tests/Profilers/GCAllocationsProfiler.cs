@@ -1,16 +1,15 @@
-﻿using CorProf.Bindings;
+﻿using Microsoft.Diagnostics.Runtime.Utilities;
+using CorProf.Bindings;
 using CorProf.Core;
 using CorProf.Shared;
-using Microsoft.Diagnostics.Runtime.Utilities;
-
 using static CorProf.Bindings.COR_PRF_MONITOR;
 using static CorProf.Bindings.COR_PRF_HIGH_MONITOR;
 using static CorProf.Bindings.COR_PRF_GC_GENERATION;
 
 namespace TestProfilers
 {
-    [ProfilerCallback("55b9554d-6115-45a2-be1e-c80f7fa35369")]
-    internal unsafe class GCAllocationsProfiler : TestProfiler
+    //[ProfilerCallback("55b9554d-6115-45a2-be1e-c80f7fa35369")]
+    internal unsafe class GCAllocationsProfiler : TestProfilerBase
     {
         private int _gcLOHAllocations = 0;
         private int _gcPOHAllocations = 0;

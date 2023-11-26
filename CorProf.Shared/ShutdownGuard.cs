@@ -1,5 +1,10 @@
 ﻿namespace CorProf.Shared
 {
+    public class ShutdownGuardAttribute: Attribute
+    {
+
+    }
+
     public class ShutdownGuard: IDisposable
     {
         private static int _preventHooks = 0;

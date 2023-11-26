@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace TestProfilers
 {
-    public abstract unsafe class TestProfiler: CorProfilerCallback2
+    internal abstract unsafe class TestProfilerBase: CorProfilerCallback2
     {
         protected ICorProfilerInfo11* _profilerInfo;
         protected ICorProfilerInfoHelpers2 _profilerInfoHelpers;
@@ -31,8 +31,7 @@ namespace TestProfilers
             {
                 _profilerInfo = (ICorProfilerInfo11*)pinfo;
 
-                _profilerInfoHelpers = new ICorProfilerInfoHelpers2(
-                    (ICorProfilerInfo2*)pinfo);
+                _profilerInfoHelpers = new ICorProfilerInfoHelpers2((ICorProfilerInfo2*)pinfo);
             }
 
             return 0;

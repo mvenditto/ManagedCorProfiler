@@ -260,11 +260,11 @@ namespace CorProf.ComInterop.Wrappers
         private class VtableDef
         {
             public uint VtableCount;
-            
+        
             public delegate* managed<IntPtr*, void> InitVtable;
 
             public Guid IID;
-            
+        
             public VtableDef(uint count, delegate* managed<IntPtr*, void> initVtable, Guid iid)
             {
                 VtableCount = count;
@@ -329,7 +329,7 @@ namespace CorProf.ComInterop.Wrappers
             }
 
             var implDefinitionLen = profilerCallbackIfaces.Count();
-            
+        
             var implDef = (ComInterfaceEntry*)RuntimeHelpers.AllocateTypeAssociatedMemory(
                     typeof(CorProfilerComWrappers),
                     sizeof(ComInterfaceEntry) * implDefinitionLen);
@@ -354,7 +354,7 @@ namespace CorProf.ComInterop.Wrappers
 
                 implDef[idx++].Vtable = (nint)vtable;
             }
-            
+        
             count = implDefinitionLen;
 
             return implDef;

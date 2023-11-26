@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
@@ -22,9 +22,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Assembly\Assembly.csproj" />
     <ProjectReference Include="..\GCAllocations\GCAllocations.csproj" />
     <ProjectReference Include="..\GCBasic\GCBasic.csproj" />
     <ProjectReference Include="..\GC\GC.csproj" />
+    <ProjectReference Include="..\Inlining\Inlining.csproj" />
+    <ProjectReference Include="..\Profilers\Tests.Profilers.csproj" />
     <ProjectReference Include="..\Transitions\Transitions.csproj" />
   </ItemGroup>
 

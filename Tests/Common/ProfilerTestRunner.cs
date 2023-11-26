@@ -16,7 +16,7 @@ namespace Tests.Common
         NoStartupAttach,
         ReverseDiagnosticsMode
     }
-    
+
     public interface IOutputHelper
     {
         void WriteLine(string message);
@@ -97,7 +97,7 @@ namespace Tests.Common
             arguments = profileePath + " RunTest " + profileeArguments;
             program = GetCorerunPath();
             string profilerPath = GetProfilerPath();
-            
+        
             if (!Path.Exists(profilerPath))
             {
                 throw new ArgumentException("Cannot locate profiler dll.");

@@ -1,5 +1,6 @@
 ﻿using CorProf.Bindings;
-using CorProf.Core.Interfaces;
+using ICorProfilerCallback3 = CorProf.Core.Interfaces.ICorProfilerCallback3;
+
 
 namespace CorProf.Core.Abstractions
 {

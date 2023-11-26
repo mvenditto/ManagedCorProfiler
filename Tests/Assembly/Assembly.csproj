@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<Optimize>true</Optimize>
+		<!-- The test launches a secondary process and process launch creates
+		an infinite event loop in the SocketAsyncEngine on Linux. Since
+		runincontext loads even framework assemblies into the unloadable
+		context, locals in this loop prevent unloading -->
+		<UnloadabilityIncompatible>true</UnloadabilityIncompatible>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Remove="TestFile.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Common\Tests.Common.csproj" />
+		<ProjectReference Include="..\TestFile\TestFile.csproj" />
+	</ItemGroup>
+
+</Project>

@@ -8,8 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Cor.Bindings\Cor.Bindings.csproj" />
-    <ProjectReference Include="..\CorProf.Shared\CorProf.Shared.csproj" />
+    <Compile Include="..\CorProf.Helpers\GlobalUsings.cs" Link="GlobalUsings.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CorProf.Core\CorProf.Core.csproj" />
+    <ProjectReference Include="..\CorProf.Helpers\CorProf.Helpers.csproj" />
   </ItemGroup>
 
 </Project>

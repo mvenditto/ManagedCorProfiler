@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -20,6 +20,7 @@
     <ProjectReference Include="..\..\CorProf.Generator\CorProf.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\..\CorProf.Core\CorProf.Core.csproj" />
     <ProjectReference Include="..\..\CorProf.Helpers\CorProf.Helpers.csproj" />
+    <ProjectReference Include="..\..\CorProf.Profiling\CorProf.Profiling.csproj" />
     <ProjectReference Include="..\Common\Tests.Common.csproj" />
   </ItemGroup>
 

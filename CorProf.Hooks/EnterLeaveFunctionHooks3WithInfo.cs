@@ -40,7 +40,7 @@ namespace CorProf.Hooks
             }
 
             HooksLib = NativeMethods.LoadLibrary(hooksLib);
-            
+        
             if (HooksLib == IntPtr.Zero) 
             {
                 throw new Exception("Failed to load hooks lib.");
@@ -51,7 +51,7 @@ namespace CorProf.Hooks
             LeaveNaked3WithInfo = TryGetProcAddress("LeaveNaked3WithInfo");
 
             TailcallNaked3WithInfo = TryGetProcAddress("TailcallNaked3WithInfo");
-            
+        
             SetCallbacks3WithInfo = (delegate*<EnterLeaveCallbacks3WithInfo*, void>)
                 TryGetProcAddress("SetEnterLeaveCallbacks3WithInfo");
         }

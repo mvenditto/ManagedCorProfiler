@@ -13,7 +13,7 @@ using static CorProf.Bindings.COR_PRF_MONITOR;
 namespace TestProfilers
 {
     [ProfilerCallback("DDADC0CB-21C8-4E53-9A6C-7C65EE5800CE")]
-    public unsafe class InliningProfiler: TestProfiler
+    internal unsafe class InliningProfiler: TestProfilerBase
     {
         private static int _failures;
 
@@ -26,7 +26,7 @@ namespace TestProfilers
         private static ICorProfilerInfo11* _sProfilerInfo;
         private static ICorProfilerInfoHelpers2 _sProfilerInfoHelpers;
 
-        [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
+        [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
         private static void EnterStub(FunctionIDOrClientID functionOrClientId, ulong eltInfo)
         {
             // SHUTDOWNGUARD_RETVOID();
@@ -35,9 +35,9 @@ namespace TestProfilers
                 return;
             }
 
-            // Console.WriteLine(">ENTER");
+            // Console.WriteLine($"> ENTER functionId=0x{functionOrClientId.functionID:x8} clientId=0x{functionOrClientId.clientID:x8}");
 
-            int hr = _sProfilerInfoHelpers.GetFunctionIDName
+            int hr = _sProfilerInfoHelpers.GetFunctionFullyQualifiedName
                 (functionOrClientId.functionID, 
                 out string functionName);
 
@@ -81,7 +81,7 @@ namespace TestProfilers
             // Console.WriteLine("<ENTER");
         }
 
-        [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
+        [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
         private static void LeaveStub(FunctionIDOrClientID functionOrClientId, ulong eltInfo)
         {
             if (ShutdownGuard.HasShutdownStarted())
@@ -91,9 +91,7 @@ namespace TestProfilers
 
             // Console.WriteLine(">LEAVE");
 
-            int hr = _sProfilerInfoHelpers.GetFunctionIDName
-                (functionOrClientId.functionID,
-                out string functionName);
+            int hr = _sProfilerInfoHelpers.GetFunctionIDName(functionOrClientId.functionID, out string functionName);
 
             if (hr < 0)
             {
@@ -120,7 +118,7 @@ namespace TestProfilers
             // Console.WriteLine("<LEAVE");
         }
 
-        [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
+        [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
         private static void TailcallStub(FunctionIDOrClientID functionOrClientId, ulong eltInfo)
         {
             if (ShutdownGuard.HasShutdownStarted())

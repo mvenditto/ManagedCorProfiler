@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<OutputType>exe</OutputType>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Optimize>true</Optimize>
+	</PropertyGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Common\Tests.Common.csproj" />
+	</ItemGroup>
+</Project>

@@ -8,7 +8,7 @@ using static CorProf.Bindings.COR_PRF_TRANSITION_REASON;
 namespace TestProfilers
 {
     [ProfilerCallback("090B7720-6605-462B-86A0-C4D4C444D3F5")]
-    internal unsafe class TransitionsProfiler: TestProfiler
+    internal unsafe class TransitionsProfiler: TestProfilerBase
     {
         //private ICorProfilerInfo11* _profilerInfo;
         //private ICorProfilerInfoHelpers2 _profilerInfoHelpers;
@@ -82,7 +82,7 @@ namespace TestProfilers
             out string funcName)
         {
             inst = null;
-            int hr = _profilerInfoHelpers.GetFunctionIDFullyQualifiedName(functionId, out funcName);
+            int hr = _profilerInfoHelpers.GetFunctionIDName(functionId, out funcName);
 
             if (hr < 0)
             {

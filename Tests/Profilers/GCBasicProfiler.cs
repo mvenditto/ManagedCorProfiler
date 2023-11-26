@@ -7,7 +7,7 @@ using Microsoft.Diagnostics.Runtime.Utilities;
 namespace TestProfilers
 {
     [ProfilerCallback("A040B953-EDE7-42D9-9077-AA69BB2BE024")]
-    internal unsafe class GCBasicProfiler : TestProfiler
+    internal unsafe class GCBasicProfiler : TestProfilerBase
     {
         private int _gcStarts = 0;
         private int _gcFinishes = 0;
@@ -30,15 +30,9 @@ namespace TestProfilers
             return HResult.S_OK;
         }
 
-        public override int GarbageCollectionStarted(int cGenerations, int* generationCollected, CorProf.Bindings.COR_PRF_GC_REASON reason)
+        [ShutdownGuard]
+        public override unsafe int GarbageCollectionStarted(int cGenerations, int* generationCollected, COR_PRF_GC_REASON reason)
         {
-            using var _ = new ShutdownGuard();
-
-            if (ShutdownGuard.HasShutdownStarted())
-            {
-                return HResult.S_OK;
-            }
-
             var gcStarts = Interlocked.Increment(ref _gcStarts);
             var gcFinishes = Interlocked.CompareExchange(ref _gcFinishes, 0, 0);
 
@@ -79,7 +73,7 @@ namespace TestProfilers
                 }
 
                 fHeapAlloc = true;
-                
+            
                 uint nObjectRanges2;
 
                 hr = _profilerInfo->GetGenerationBounds(cRanges, &nObjectRanges2, pObjectRanges);
@@ -119,15 +113,9 @@ namespace TestProfilers
             return HResult.S_OK;
         }
 
+        [ShutdownGuard]
         public override int GarbageCollectionFinished()
         {
-            using var _ = new ShutdownGuard();
-
-            if (ShutdownGuard.HasShutdownStarted())
-            {
-                return HResult.S_OK;
-            }
-
             var gcFinishes = Interlocked.Increment(ref _gcFinishes);
             var gcStarts = Interlocked.CompareExchange(ref _gcStarts, 0, 0);
 
