@@ -13,15 +13,25 @@
   </PropertyGroup>
   
   <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.49-beta">
+      <PrivateAssets>all</PrivateAssets>
+      <!--<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>-->
+    </PackageReference>
+    <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
     <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\CorProf.Bindings\CorProf.Bindings.csproj" />
     <ProjectReference Include="..\..\CorProf.Generator\CorProf.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\..\CorProf.Core\CorProf.Core.csproj" />
     <ProjectReference Include="..\..\CorProf.Helpers\CorProf.Helpers.csproj" />
     <ProjectReference Include="..\..\CorProf.Profiling\CorProf.Profiling.csproj" />
     <ProjectReference Include="..\Common\Tests.Common.csproj" />
   </ItemGroup>
+
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+    <DefineConstants>OS_WINDOWS</DefineConstants>
+  </PropertyGroup>
 
 </Project>

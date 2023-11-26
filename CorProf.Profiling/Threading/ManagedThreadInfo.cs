@@ -21,6 +21,11 @@ public sealed class ManagedThreadInfo : IThreadInfo
     {
     }
 
+    public static ManagedThreadInfo Create(ThreadID clrThreadId)
+    {
+        return new(clrThreadId);
+    }
+
     public ThreadID CLRThreadId => _clrThreadId;
 
     public nint OSThreadHandle => _osThreadHandle;
