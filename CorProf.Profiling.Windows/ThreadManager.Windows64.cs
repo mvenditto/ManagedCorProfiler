@@ -103,12 +103,11 @@ public class Windows64ThreadManager : IThreadManager, IDisposable
 
     internal unsafe bool EnsureThreadIsSuspended(HANDLE osThreadHandle)
     {
-        var context = (CONTEXT*)NativeMemory.AlignedAlloc((nuint)sizeof(CONTEXT), 16);
+        var context = (CONTEXT*)NativeMemory. not((nuint)sizeof(CONTEXT), 16);
         context->ContextFlags = CONTEXT_FLAGS.CONTEXT_INTEGER;
         var result = GetThreadContext(osThreadHandle, context);
         _logger.LogDebug("GetThreadContext(): {Result}", result);
-        //NativeMemory.Free(context);
-        Console.WriteLine($"Free: 0x{((nint)context):x8}");
+        NativeMemory.AlignedFree(context);
         return result;
     }
 
