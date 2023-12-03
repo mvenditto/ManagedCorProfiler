@@ -24,7 +24,7 @@ namespace TestProfilers
                 | COR_PRF_HIGH_MONITOR_LARGEOBJECT_ALLOCATED 
                 | COR_PRF_HIGH_MONITOR_PINNEDOBJECT_ALLOCATED;
 
-            int hr = _profilerInfo->SetEventMask2((uint)eventsLow, (uint)eventsHigh);
+            int hr = ProfilerInfo->SetEventMask2((uint)eventsLow, (uint)eventsHigh);
 
             if (hr < 0)
             {
@@ -46,7 +46,7 @@ namespace TestProfilers
 
             COR_PRF_GC_GENERATION_RANGE gen;
 
-            int hr = _profilerInfo->GetObjectGeneration(objectId, &gen);
+            int hr = ProfilerInfo->GetObjectGeneration(objectId, &gen);
 
             if (hr < 0)
             {

@@ -1,0 +1,12 @@
+GetThreadTimes
+SuspendThread
+ResumeThread
+GetThreadContext
+NtQueryInformationThread
+DuplicateHandle
+
+FileTimeToSystemTime
+SystemTimeToFileTime
+
+WIN32_ERROR
+DWORD

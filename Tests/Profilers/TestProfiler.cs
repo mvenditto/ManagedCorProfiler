@@ -8,8 +8,8 @@ namespace TestProfilers
 {
     internal abstract unsafe class TestProfilerBase: CorProfilerCallback2
     {
-        protected ICorProfilerInfo11* _profilerInfo;
-        protected ICorProfilerInfoHelpers2 _profilerInfoHelpers;
+        protected ICorProfilerInfo11* ProfilerInfo;
+        protected ICorProfilerInfoHelpers2 ProfilerInfoHelpers;
 
         public override int Initialize(IUnknown* unknown)
         {
@@ -25,13 +25,13 @@ namespace TestProfilers
             if (hr < 0)
             {
                 Console.WriteLine("Profiler.dll!Profiler::Initialize failed to QI for ICorProfilerInfo.");
-                _profilerInfo = null;
+                ProfilerInfo = null;
             }
             else
             {
-                _profilerInfo = (ICorProfilerInfo11*)pinfo;
+                ProfilerInfo = (ICorProfilerInfo11*)pinfo;
 
-                _profilerInfoHelpers = new ICorProfilerInfoHelpers2((ICorProfilerInfo2*)pinfo);
+                ProfilerInfoHelpers = new ICorProfilerInfoHelpers2((ICorProfilerInfo2*)pinfo);
             }
 
             return 0;

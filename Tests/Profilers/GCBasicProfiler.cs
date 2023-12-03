@@ -19,7 +19,7 @@ namespace TestProfilers
 
             var eventsHigh = COR_PRF_HIGH_MONITOR.COR_PRF_HIGH_BASIC_GC;
 
-            int hr = _profilerInfo->SetEventMask2(0, (uint) eventsHigh);
+            int hr = ProfilerInfo->SetEventMask2(0, (uint) eventsHigh);
 
             if (hr < 0)
             {
@@ -53,7 +53,7 @@ namespace TestProfilers
                 COR_PRF_GC_GENERATION_RANGE* pObjectRanges = null;
                 uint cRanges = 32;
                 using var objectRangesStackBuffer = NativeBuffer<COR_PRF_GC_GENERATION_RANGE>.Alloc(cRanges);
-                int hr = _profilerInfo->GetGenerationBounds(cRanges, &nObjectRanges, objectRangesStackBuffer);
+                int hr = ProfilerInfo->GetGenerationBounds(cRanges, &nObjectRanges, objectRangesStackBuffer);
                 if (hr < 0)
                 {
                     Interlocked.Increment(ref _gcFailures);
@@ -76,7 +76,7 @@ namespace TestProfilers
             
                 uint nObjectRanges2;
 
-                hr = _profilerInfo->GetGenerationBounds(cRanges, &nObjectRanges2, pObjectRanges);
+                hr = ProfilerInfo->GetGenerationBounds(cRanges, &nObjectRanges2, pObjectRanges);
 
                 if (hr < 0 || nObjectRanges != nObjectRanges2)
                 {

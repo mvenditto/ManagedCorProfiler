@@ -20,5 +20,4 @@
     <ProjectReference Include="..\CorProf.Core\CorProf.Core.csproj" />
     <ProjectReference Include="..\CorProf.Helpers\CorProf.Helpers.csproj" />
   </ItemGroup>
-
 </Project>

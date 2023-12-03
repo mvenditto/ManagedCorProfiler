@@ -4,13 +4,14 @@ using CorProf.Profiling.Extensions;
 using CorProf.Profiling.Threading;
 using Microsoft.Diagnostics.Runtime.Utilities;
 using Serilog;
-using Windows.Win32;
 using Windows.Win32.Foundation;
-using System.Diagnostics;
 using Serilog.Extensions.Logging;
 using Microsoft.Extensions.Logging;
 using CorProf.Helpers;
 using System.Buffers;
+
+using CorProf.Profiling.Windows;
+using CorProf.Profiling.Abstractions;
 
 namespace TestProfilers;
 
@@ -18,6 +19,7 @@ namespace TestProfilers;
 internal unsafe class StackSamplingProfiler_Threading : TestProfilerBase
 {
     private readonly ManagedThreadRegistry _threadRegistry;
+    private readonly Windows64ThreadManager _threadManager;
 
     private int _seenThreads = 0;
 
@@ -32,6 +34,10 @@ internal unsafe class StackSamplingProfiler_Threading : TestProfilerBase
 
         _threadRegistry = new ManagedThreadRegistry(
             logger.CreateLogger<ManagedThreadRegistry>());
+
+        _threadManager = new Windows64ThreadManager(
+            logger.CreateLogger<Windows64ThreadManager>(),
+            profilerInfo: (ICorProfilerInfo4*)ProfilerInfo);
     }
 
     public override int Initialize(IUnknown* unknown)
@@ -43,7 +49,7 @@ internal unsafe class StackSamplingProfiler_Threading : TestProfilerBase
             return hr;
         }
 
-        hr = _profilerInfo->SetEventMask2((uint)COR_PRF_MONITOR.COR_PRF_MONITOR_THREADS, 0);
+        hr = ProfilerInfo->SetEventMask2((uint)COR_PRF_MONITOR.COR_PRF_MONITOR_THREADS, 0);
 
         if (hr < 0)
         {
@@ -67,56 +73,17 @@ internal unsafe class StackSamplingProfiler_Threading : TestProfilerBase
         return HResult.S_OK;
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "DuplicateHandle is guarded.")]
     public override int ThreadAssignedToOSThread(ulong managedThreadId, uint osThreadId)
     {
-        IntPtr osThreadHandle = IntPtr.Zero;
-
-        var hr = _profilerInfo->GetHandleFromThread(managedThreadId, (void**)&osThreadHandle);
-
-        if (hr != HResult.S_OK)
-        {
-            Log.Logger.Warning("FAIL GetHandleFromThread() with hr=0x{hr:x8}", hr);
-            return hr;
-        }
-
-        Log.Logger.Debug("GetHandleFromThread -> 0x{OsThreadHandle:x8}", osThreadHandle);
-
-        var realThreadHandle = HANDLE.Null;
-
-#if OS_WINDOWS
-        var currProcess = Process.GetCurrentProcess();
-        var processHandle = new HANDLE(currProcess.Handle);
-        var threadHandle = new HANDLE(osThreadHandle);
-
-        const uint THREAD_ALL_ACCESS = 0x1FFFFF;
-        const DUPLICATE_HANDLE_OPTIONS DefaultDuplicateHandleOpts = 0;
-
-        // acquire a real handle instead of a pseudo-handle.
-        hr = PInvoke.DuplicateHandle(
-            processHandle,
-            threadHandle,
-            processHandle,
-            &realThreadHandle,
-            THREAD_ALL_ACCESS,
-            false,
-            DefaultDuplicateHandleOpts
-        );
-
-        if (hr <= HResult.S_OK)
-        {
-            Log.Logger.Warning("FAIL Kernel32::DuplicateHandle() with hr=0x{hr:x8}", hr);
-            return hr;
-        }
-#else
-        dupeThreadHandle = threadHandle;
-#endif
+        var realThreadHandle = _threadManager.GetThreadHandle(managedThreadId);
 
         _threadRegistry.SetOSThreadInfo(managedThreadId, osThreadId, realThreadHandle);
 
         return HResult.S_OK;
     }
 
+    // NOTE: It seems thread callbacks are not guaranteed to be ordered.
+    // hence ThreadNameChanged() may be called before ThreadCreated().
     public override unsafe int ThreadNameChanged(ulong threadId, uint cchName, ushort* name)
     {
         var threadName = cchName == 0 
@@ -133,6 +100,8 @@ internal unsafe class StackSamplingProfiler_Threading : TestProfilerBase
     public override int Shutdown()
     {
         base.Shutdown();
+
+        _threadManager.Dispose();
 
         var threads = _threadRegistry.AsEnumerable().ToArray();
 

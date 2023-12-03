@@ -23,7 +23,7 @@ namespace TestProfilers
         {
             base.Initialize(unknown);
 
-            int hr = _profilerInfo->SetEventMask2((uint) COR_PRF_MONITOR_GC, 0);
+            int hr = ProfilerInfo->SetEventMask2((uint) COR_PRF_MONITOR_GC, 0);
 
             if (hr < 0)
             {
@@ -43,7 +43,7 @@ namespace TestProfilers
             {
                 COR_PRF_GC_GENERATION_RANGE gen;
             
-                hr = _profilerInfo->GetObjectGeneration(objectId, &gen);
+                hr = ProfilerInfo->GetObjectGeneration(objectId, &gen);
             
                 if (hr < 0)
                 {

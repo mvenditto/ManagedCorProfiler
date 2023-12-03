@@ -51,7 +51,7 @@ namespace TestProfilers
             var eventsLow = COR_PRF_MONITOR.COR_PRF_MONITOR_CODE_TRANSITIONS
                 | COR_PRF_MONITOR.COR_PRF_DISABLE_INLINING;
 
-            int hr = _profilerInfo->SetEventMask2((uint)eventsLow, 0);
+            int hr = ProfilerInfo->SetEventMask2((uint)eventsLow, 0);
 
             if (hr < 0)
             {
@@ -82,7 +82,7 @@ namespace TestProfilers
             out string funcName)
         {
             inst = null;
-            int hr = _profilerInfoHelpers.GetFunctionIDName(functionId, out funcName);
+            int hr = ProfilerInfoHelpers.GetFunctionIDName(functionId, out funcName);
 
             if (hr < 0)
             {

@@ -131,10 +131,10 @@ namespace TestProfilers
         {
             base.Initialize(unknown);
 
-            _sProfilerInfo = _profilerInfo;
-            _sProfilerInfoHelpers = _profilerInfoHelpers;
+            _sProfilerInfo = ProfilerInfo;
+            _sProfilerInfoHelpers = ProfilerInfoHelpers;
 
-            int hr = _profilerInfo->SetEventMask2((uint)(COR_PRF_MONITOR_ENTERLEAVE
+            int hr = ProfilerInfo->SetEventMask2((uint)(COR_PRF_MONITOR_ENTERLEAVE
                                                     | COR_PRF_ENABLE_FUNCTION_ARGS
                                                     | COR_PRF_ENABLE_FUNCTION_RETVAL
                                                     | COR_PRF_ENABLE_FRAME_INFO
@@ -157,7 +157,7 @@ namespace TestProfilers
 
             EnterLeaveHooks3WithInfo.SetCallbacks(EnterLeaveHooks3WithInfo.EnterLeaveCallbacks);
 
-            hr = _profilerInfo->SetEnterLeaveFunctionHooks3WithInfo(
+            hr = ProfilerInfo->SetEnterLeaveFunctionHooks3WithInfo(
                 (delegate* unmanaged[Stdcall]<FunctionIDOrClientID, ulong, void>)EnterLeaveHooks3WithInfo.EnterNaked3WithInfo,
                 (delegate* unmanaged[Stdcall]<FunctionIDOrClientID, ulong, void>)EnterLeaveHooks3WithInfo.LeaveNaked3WithInfo,
                 (delegate* unmanaged[Stdcall]<FunctionIDOrClientID, ulong, void>)EnterLeaveHooks3WithInfo.TailcallNaked3WithInfo);
@@ -182,7 +182,7 @@ namespace TestProfilers
 
             Console.WriteLine("JITInlining");
 
-            int hr = _profilerInfoHelpers.GetFunctionIDName(
+            int hr = ProfilerInfoHelpers.GetFunctionIDName(
                 calleeId,
                 out string inlineeName);
 
@@ -195,7 +195,7 @@ namespace TestProfilers
             if (inlineeName == "Inlinee")
             {
                 Console.WriteLine("JITInlining: Inlinee");
-                hr = _profilerInfoHelpers.GetFunctionIDName(
+                hr = ProfilerInfoHelpers.GetFunctionIDName(
                     callerId,
                     out string inlinerName);
 
