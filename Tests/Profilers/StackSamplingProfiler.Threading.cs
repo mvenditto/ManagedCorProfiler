@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 using CorProf.Helpers;
 using System.Buffers;
 
-using CorProf.Profiling.Windows;
+using CorProf.Profiling.Windows64;
 using CorProf.Profiling.Abstractions;
 
 namespace TestProfilers;

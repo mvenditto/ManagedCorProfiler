@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -27,7 +28,6 @@
     <ProjectReference Include="..\..\CorProf.Core\CorProf.Core.csproj" />
     <ProjectReference Include="..\..\CorProf.Helpers\CorProf.Helpers.csproj" />
     <ProjectReference Include="..\..\CorProf.Profiling.Windows\CorProf.Profiling.Windows.csproj" />
-    <ProjectReference Include="..\..\CorProf.Profiling\CorProf.Profiling.csproj" />
     <ProjectReference Include="..\Common\Tests.Common.csproj" />
   </ItemGroup>
 

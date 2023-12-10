@@ -47,7 +47,7 @@ namespace Tests.Common
             Console.WriteLine(currDir);
 
             string profilerPath = Path.Combine(
-                Path.GetFullPath(@"..\..\..\..\Profilers\bin\profiler\"),
+                Path.GetFullPath(@"..\..\..\..\..\Profilers\bin\profiler\"),
                 profilerName);
             return profilerPath;
         }

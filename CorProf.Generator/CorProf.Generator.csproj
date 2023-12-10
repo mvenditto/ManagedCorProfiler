@@ -9,7 +9,8 @@
     <LangVersion>latest</LangVersion>
     <IsPublishable>False</IsPublishable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <IncludeBuildOutput>false</IncludeBuildOutput>  <!-- Do not include the generator as a lib dependency -->
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <Platforms>AnyCPU;x64</Platforms>  <!-- Do not include the generator as a lib dependency -->
   </PropertyGroup>
 
   <ItemGroup>

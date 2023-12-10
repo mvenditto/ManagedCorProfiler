@@ -7,7 +7,7 @@ using Serilog;
 using Serilog.Extensions.Logging;
 using Microsoft.Extensions.Logging;
 using CorProf.Helpers;
-using CorProf.Profiling.Windows;
+using CorProf.Profiling.Windows64;
 using System.Diagnostics;
 using Windows.Win32.Foundation;
 

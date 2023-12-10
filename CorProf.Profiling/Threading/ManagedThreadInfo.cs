@@ -9,6 +9,8 @@ public sealed class ManagedThreadInfo : IThreadInfo
     private uint _osThreadId;
     private nint _osThreadHandle;
 
+    private readonly SemaphoreSlim _stackWalkSemaphore = new(1);
+
     private ManagedThreadInfo(ThreadID clrThreadId, uint osThreadId, HANDLE osThreadHandle, string threadName)
     {
         _clrThreadId = clrThreadId;
@@ -43,5 +45,15 @@ public sealed class ManagedThreadInfo : IThreadInfo
     public void SetThreadName(string threadName)
     {
         _threadName = threadName;
+    }
+
+    public bool AcquireStackWalkLock(int millisecondsTimeout)
+    {
+        return _stackWalkSemaphore.Wait(millisecondsTimeout);
+    }
+
+    public void ReleaseStackWalkLock()
+    {
+        _stackWalkSemaphore.Release();
     }
 }

@@ -11,6 +11,7 @@
 		runincontext loads even framework assemblies into the unloadable
 		context, locals in this loop prevent unloading -->
 		<UnloadabilityIncompatible>true</UnloadabilityIncompatible>
+		<Platforms>AnyCPU;x64</Platforms>
 	</PropertyGroup>
 
 	<ItemGroup>

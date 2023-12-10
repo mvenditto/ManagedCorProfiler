@@ -5,4 +5,5 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>", Scope = "member", Target = "~M:CorProf.Profiling.Windows.Tests.TimeTests.FILETIME_ToMilliseconds")]
+[assembly: SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>", Scope = "member", Target = "~M:CorProf.Profiling.Windows64.Tests.TimeTests.FILETIME_ToMilliseconds")]
+[assembly: SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>", Scope = "member", Target = "~M:CorProf.Profiling.Windows64.Tests.ThreadingTests.Windows64ThreadManager_GetThreadStackLimits")]

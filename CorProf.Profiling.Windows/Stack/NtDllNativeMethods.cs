@@ -4,10 +4,11 @@ using DWORD = uint;
 using DWORD64 = ulong;
 using BYTE = byte;
 
-namespace CorProf.Profiling.Windows.Stack;
+namespace CorProf.Profiling.Windows64.Stack;
 
 internal static unsafe partial class NtDllNativeMethods
 {
+    /*
     internal static class CONTEXT_FLAGS
     {
         public const uint CONTEXT_i386 = 0x10000;
@@ -244,4 +245,5 @@ internal static unsafe partial class NtDllNativeMethods
     internal static unsafe partial bool GetThreadContext(
         nint threadHandle,
         CONTEXT* context);
+    */
 }

@@ -1,9 +1,21 @@
 GetThreadTimes
 SuspendThread
 ResumeThread
+OpenThread
+OpenProcess
 GetThreadContext
+GetCurrentThread
+GetCurrentThreadId
+RtlZeroMemory
 NtQueryInformationThread
+NT_TIB
+UNWIND_HISTORY_TABLE 
+CONTEXT
 DuplicateHandle
+
+LoadLibrary
+GetModuleHandle
+GetProcAddress
 
 FileTimeToSystemTime
 SystemTimeToFileTime
