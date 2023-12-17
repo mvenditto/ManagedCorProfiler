@@ -7,6 +7,7 @@ using Xunit.Abstractions;
 using Windows.Win32.System.Threading;
 using CorProf.Profiling.Threading;
 using System.Runtime.InteropServices;
+using CorProf.Profiling.Windows64.Stack;
 
 namespace CorProf.Profiling.Windows64.Tests;
 
@@ -130,7 +131,7 @@ public class ThreadingTests
             {
                 // Get a pseudo handle to the target thread
                 var osThreadHandlePseudo = PInvoke.OpenThread(
-                    THREAD_ACCESS_RIGHTS.THREAD_SUSPEND_RESUME,
+                    THREAD_ACCESS_RIGHTS.THREAD_SUSPEND_RESUME | THREAD_ACCESS_RIGHTS.THREAD_GET_CONTEXT,
                     false,
                     (uint)targetThread.Id);
 
@@ -145,14 +146,14 @@ public class ThreadingTests
                     threadHandle,
                     processHandle,
                     &osThreadHandleReal,
-                    (uint)THREAD_ACCESS_RIGHTS.THREAD_SUSPEND_RESUME,
+                    (uint)(THREAD_ACCESS_RIGHTS.THREAD_SUSPEND_RESUME | THREAD_ACCESS_RIGHTS.THREAD_GET_CONTEXT),
                     false,
                     0
                 );
 
-                if (res == 0)
+                if (res.Value == 0)
                 {
-                    Assert.Fail(Marshal.GetLastPInvokeErrorMessage());
+                    Assert.Fail($"FAIL Kernel32::DuplicateHandle() with hr={res:x8}");
                 }
 
                 var tInfo = new ManagedThreadInfo(0);
@@ -161,9 +162,111 @@ public class ThreadingTests
                 Assert.True(tm.TrySuspendThread(tInfo));
                 Assert.True(tm.TryResumeThread(tInfo));
 
-                if (res == 0)
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                // Close the duplicated handle.
+                // NOTE: the pseudo handle do NOT need to be closed.
+                if (osThreadHandleReal != HANDLE.Null)
+                {
+                    PInvoke.CloseHandle(osThreadHandleReal);
+                }
+            }
+        }
+    }
+
+
+    [Fact]
+    public void Windows64ThreadManager_ThreadStackUnwind()
+    {
+        var currProcess = Process.GetCurrentProcess();
+
+        var e = new ManualResetEventSlim(false);
+
+        var osThreadId = 0U;
+
+        var t = new Thread(() =>
+        {
+            osThreadId = PInvoke.GetCurrentThreadId();
+            e.Set();
+            var i = 0;
+            while (true)
+            {
+                i += 0;
+            }
+        });
+
+        t.Start();
+
+        e.Wait();
+
+        var targetThread = currProcess.Threads
+            .OfType<ProcessThread>()
+            .Where(x => x.Id == osThreadId)
+            .First();
+
+        _testOutputHelper.WriteLine(currProcess.ProcessName);
+        _testOutputHelper.WriteLine(targetThread.Id.ToString());
+
+        unsafe
+        {
+            var tm = new Windows64ThreadManager(NullLogger<Windows64ThreadManager>.Instance, null);
+            var osThreadHandleReal = HANDLE.Null;
+
+            try
+            {
+                // Get a pseudo handle to the target thread
+                var osThreadHandlePseudo = PInvoke.OpenThread(
+                    THREAD_ACCESS_RIGHTS.THREAD_ALL_ACCESS,
+                    false,
+                    (uint)targetThread.Id);
+
+                var processHandle = new HANDLE(currProcess.Handle);
+                var threadHandle = new HANDLE(osThreadHandlePseudo);
+
+                osThreadHandleReal = HANDLE.Null;
+
+                // Acquire a "real" handle instead of a pseudo-handle.
+                var res = PInvoke.DuplicateHandle(
+                    processHandle,
+                    threadHandle,
+                    processHandle,
+                    &osThreadHandleReal,
+                    (uint)THREAD_ACCESS_RIGHTS.THREAD_ALL_ACCESS,
+                    false,
+                    0
+                );
+
+                if (res.Value == 0)
                 {
                     Assert.Fail($"FAIL Kernel32::DuplicateHandle() with hr={res:x8}");
+                }
+
+                var tInfo = new ManagedThreadInfo(0);
+                tInfo.SetOSThreadInfo((uint)targetThread.Id, osThreadHandleReal);
+
+                var unwinder = new Windows64StackWalker(tm, tInfo, null);
+
+                Assert.True(tm.TrySuspendThread(tInfo));
+
+                var res2 = unwinder.Unwind();
+
+                Assert.True(tm.TryResumeThread(tInfo));
+
+                if (res2 != 0)
+                {
+                    var err = Marshal.GetLastPInvokeError();
+                    var msg = Marshal.GetLastPInvokeErrorMessage();
+                    Assert.Fail($"FAIL Unwind {res2} 0x{err:x8} {msg}");
+                }
+
+                foreach (var frame in unwinder.Frames)
+                {
+                    _testOutputHelper.WriteLine($"0x{frame:x8}");
                 }
             }
             catch

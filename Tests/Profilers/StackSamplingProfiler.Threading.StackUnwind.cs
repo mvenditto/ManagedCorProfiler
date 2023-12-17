@@ -10,11 +10,17 @@ using CorProf.Helpers;
 using CorProf.Profiling.Windows64;
 using System.Diagnostics;
 using Windows.Win32.Foundation;
+using CorProf.Profiling.Windows64.Stack;
+
+using FunctionID = ulong;
+using ModuleID = ulong;
+using ClassID = ulong;
+using System.Runtime.InteropServices;
 
 namespace TestProfilers;
 
-[ProfilerCallback("1B0551A7-17A5-444F-BE02-88556934C0D2")]
-internal class StackSamplingProfiler_Threading_Suspension : TestProfilerBase
+[ProfilerCallback("1B0551A7-17A5-444F-BE02-88556934C0D3")]
+internal class StackSamplingProfiler_Threading_StackUnwind : TestProfilerBase
 {
     private readonly ManagedThreadRegistry _threadRegistry;
     private bool _targetThreadFound = false;
@@ -27,7 +33,7 @@ internal class StackSamplingProfiler_Threading_Suspension : TestProfilerBase
     private bool _threadSuspended;
     private bool _threadResumed;
 
-    public unsafe StackSamplingProfiler_Threading_Suspension()
+    public unsafe StackSamplingProfiler_Threading_StackUnwind()
     {
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Debug()
@@ -72,15 +78,56 @@ internal class StackSamplingProfiler_Threading_Suspension : TestProfilerBase
 
             Console.WriteLine($"Start test: 0x{targetThreadInfo?.OSThreadHandle:x8}");
 
-            _threadSuspended = _threadManager.TrySuspendThread(targetThreadInfo!);
+            var stackWalker = new Windows64StackWalker(
+                _threadManager,
+                targetThreadInfo!,
+                (ICorProfilerInfo4*)ProfilerInfo);
 
-            Log.Logger.Information("Thread suspended: {ThreadSuspended}", _threadSuspended);
+            _threadSuspended = _threadManager.TrySuspendThread(targetThreadInfo!);
 
             if (_threadSuspended)
             {
+                var walkResult = stackWalker.Unwind();
                 _threadResumed = _threadManager.TryResumeThread(targetThreadInfo!);
-                Log.Logger.Information("Thread resumed: {ThreadResumed}", _threadResumed);
             }
+            
+            foreach(var frame in stackWalker.Frames)
+            {
+                FunctionID functionId = 0;
+                FunctionID rejitId = 0;
+
+                var hr = ProfilerInfo->GetFunctionFromIP3((byte*)frame, &functionId, &rejitId);
+                
+                if (hr != HResult.S_OK)
+                {
+                    Console.WriteLine($"0x{frame:x8} | ");
+
+                    if (hr != HResult.E_FAIL)
+                    {
+                        Console.Write($"FuncNameErr[{hr:x8}]");
+                    }
+
+                    continue;
+                }
+
+                hr = ProfilerInfoHelpers.GetFunctionIDName(functionId, out var functionName);
+
+                if (hr != HResult.S_OK)
+                {
+                    Console.WriteLine($"0x{frame:x8} | ");
+
+                    if (hr != HResult.E_FAIL)
+                    {
+                        Console.Write($"FuncNameErr[{hr:x8}]");
+                    }
+
+                    continue;
+                }
+
+                Console.WriteLine($"0x{frame:x8} | {functionName}");
+            }
+
+            stackWalker.Dispose();
         }).Start();
     }
 

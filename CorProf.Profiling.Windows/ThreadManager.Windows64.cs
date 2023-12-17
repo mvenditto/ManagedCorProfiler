@@ -156,15 +156,20 @@ public class Windows64ThreadManager : IThreadManager, IDisposable
         return false;
     }
 
-    public bool TrySuspendThread(ManagedThreadInfo clrThreadInfo)
+    public unsafe bool TrySuspendThread(ManagedThreadInfo clrThreadInfo)
     {
         var osThreadHandle = new HANDLE(clrThreadInfo.OSThreadHandle);
+
+        var context = (CONTEXT*)NativeMemory.AlignedAlloc((nuint)sizeof(CONTEXT), 16);
+        context->ContextFlags = CONTEXT_FLAGS.CONTEXT_INTEGER_AMD64; // CONTEXT_INTEGER
 
         var suspendCount = PInvoke.SuspendThread(osThreadHandle);
 
         if (suspendCount == SuspendThreadFailed)
         {
             var lastError = (uint)Marshal.GetLastPInvokeError();
+
+            throw new Exception(Marshal.GetLastPInvokeErrorMessage());
 
             _logger.LogError(
                 "Failed to SuspendThread() for thread 0x{ThreadHandle:x8} with error code 0x{ErrorCode:x8}: {Message}",
@@ -179,15 +184,14 @@ public class Windows64ThreadManager : IThreadManager, IDisposable
         // ensure the thread is actually suspended.
         // SuspendThread() is asynchronous and the scheduler may not immediately suspend the thread.
         // see: https://devblogs.microsoft.com/oldnewthing/20150205-00/?p=44743
-        if (EnsureThreadIsSuspended(osThreadHandle))
+        if (PInvoke.GetThreadContext(osThreadHandle, context).Value != 0)
         {
             // do not allocate after the thread is suspend or it may deadlock!
             return true;
         }
+        PInvoke.ResumeThread(osThreadHandle);
 
         _logger.LogWarning("Unable to suspend thread 0x{OsThreadHandle:x8}", osThreadHandle);
-
-        PInvoke.ResumeThread(osThreadHandle);
 
         return false;
     }
@@ -272,21 +276,19 @@ public class Windows64ThreadManager : IThreadManager, IDisposable
 
     internal unsafe bool GetThreadStackLimits(ref HANDLE handle, ref ulong stackLimit, ref ulong stackBase)
     {
-        var threadBasicInfo = (THREAD_BASIC_INFORMATION*)NativeMemory.Alloc((nuint)sizeof(THREAD_BASIC_INFORMATION));
+        var threadBasicInfo = stackalloc THREAD_BASIC_INFORMATION[1];
 
         uint returnLength = 0;
 
         var result = QueryInformationThreadDelegate(
             handle,
             THREADINFOCLASS.ThreadBasicInformation,
-            &threadBasicInfo[0],
+            threadBasicInfo, //
             (uint)sizeof(THREAD_BASIC_INFORMATION),
             &returnLength);
 
         if (result.SeverityCode != NTSTATUS.Severity.Success)
         {
-            _logger.LogWarning("FAIL NtQueryInformationThread() with hr=0x{hr:x8} {message}", result, result);
-            NativeMemory.Free(threadBasicInfo);
             return false;
         }
 
@@ -294,8 +296,6 @@ public class Windows64ThreadManager : IThreadManager, IDisposable
 
         if (!hasThreadInfo)
         {
-            _logger.LogWarning("FAIL NtQueryInformationThread()");
-            NativeMemory.Free(threadBasicInfo);
             return false;
         }
 
@@ -304,7 +304,6 @@ public class Windows64ThreadManager : IThreadManager, IDisposable
         stackLimit = (ulong)tib->StackLimit;
         stackBase = (ulong)tib->StackBase;
 
-        NativeMemory.Free(threadBasicInfo);
         return true;
     }
 

@@ -6,7 +6,9 @@ OpenProcess
 GetThreadContext
 GetCurrentThread
 GetCurrentThreadId
-RtlZeroMemory
+
+RtlVirtualUnwind
+RtlLookupFunctionEntry
 NtQueryInformationThread
 NT_TIB
 UNWIND_HISTORY_TABLE 
@@ -16,9 +18,12 @@ DuplicateHandle
 LoadLibrary
 GetModuleHandle
 GetProcAddress
+GetCurrentProcess
 
 FileTimeToSystemTime
 SystemTimeToFileTime
 
 WIN32_ERROR
 DWORD
+
+SymFromAddr
