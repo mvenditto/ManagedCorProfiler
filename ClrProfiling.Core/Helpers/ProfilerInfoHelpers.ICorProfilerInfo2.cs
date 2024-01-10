@@ -11,7 +11,9 @@ using ModuleID = nuint;
 using ClassID = nuint;
 using ULONG32 = uint;
 using mdToken = uint;
+using mdTypeDef = uint;
 using COR_PRF_FRAME_INFO = nuint;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ClrProfiling.Helpers;
 
@@ -248,13 +250,8 @@ public static unsafe class ProfilerInfoHelpers
         return HRESULT.S_OK;
     }
 
-    public static int GetClassIDName(ICorProfilerInfo2* profilerInfo, ulong classId, out string className)
+    public static int GetClassIDName(ICorProfilerInfo2* profilerInfo, nuint classId, out string className)
     {
-        nuint moduleId;
-        uint mdTypeDef;
-        nuint parentClassID;
-        uint nTypeArgs;
-        using var typeArgs = NativeBuffer<nuint>.Alloc(ShortLength);
         className = string.Empty;
 
         if (classId == 0)
@@ -262,12 +259,18 @@ public static unsafe class ProfilerInfoHelpers
             return HRESULT.E_FAIL;
         }
 
+        ModuleID moduleId = 0;
+        mdTypeDef classToken;
+        ClassID parentClassID;
+        ULONG32 nTypeArgs;
+        using var typeArgs = NativeBuffer<ClassID>.Alloc(ShortLength);
+        
         var hr = profilerInfo->GetClassIDInfo2(
-            (nuint)classId,
+            classId,
             &moduleId,
-            &mdTypeDef,
+            &classToken,
             &parentClassID,
-            typeArgs.Length,
+            ShortLength,
             &nTypeArgs,
             typeArgs);
 
@@ -288,6 +291,7 @@ public static unsafe class ProfilerInfoHelpers
         }
         else if (hr.Failed)
         {
+            Console.WriteLine($"FAIL: GetClassIDInfo returned {hr} for ClassID 0x{classId:x8}");
             className = "GetClassIDNameFailed";
             return hr;
         }
@@ -304,42 +308,47 @@ public static unsafe class ProfilerInfoHelpers
 
         if (hr.Failed)
         {
+            Console.WriteLine($"FAIL: GetModuleMetaData call failed with hr={hr}");
+            className = "ClassIDLookupFailed";
             return hr;
         }
 
         var metadataImport = metadataImportPtr.Get();
 
-        using var buff = NativeBuffer<ushort>.Alloc(ShortLength);
+        using var buff = NativeBuffer<ushort>.Alloc(LongLength);
         var szName = new PWSTR((char*)buff.Pointer);
 
-        uint typeDefToken = 0;
         uint typeDefFlags = 0;
 
         hr = metadataImport->GetTypeDefProps(
-            typeDefToken,
+            classToken,
             szName,
-            ShortLength,
+            LongLength,
             null,
             &typeDefFlags,
             null);
 
         if (hr.Failed)
         {
+            Console.WriteLine($"FAIL: GetModuleMetaData call failed with hr={hr}");
+            className = "ClassIDLookupFailed";
             return hr;
         }
 
-        string name = MarshalHelpers.PtrToStringUtf16(buff) ?? "???";
+        string name = szName.ToString();
 
         if (nTypeArgs > 0)
         {
             name += "<";
         }
 
+        string typeArgClassName = string.Empty;
+
         for (uint i = 0; i < nTypeArgs; i++)
         {
-            GetClassIDName(profilerInfo, typeArgs[i], out var typeArgName);
+            GetClassIDName(profilerInfo, typeArgs[i], out typeArgClassName);
 
-            name += typeArgName;
+            name += typeArgClassName;
 
             if (i + 1 != nTypeArgs)
             {
