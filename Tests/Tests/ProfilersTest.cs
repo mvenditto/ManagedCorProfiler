@@ -73,5 +73,11 @@ namespace Tests
         {
             Assert.Equal(100, InliningTest.ExecuteTest(NoArgs, _outputHelper));
         }
+
+        [Fact]
+        public void Handles()
+        {
+            Assert.Equal(100, HandlesTests.ExecuteTest(NoArgs, _outputHelper));
+        }
     }
 }

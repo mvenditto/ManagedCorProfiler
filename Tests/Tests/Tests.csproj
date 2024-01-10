@@ -30,6 +30,7 @@
     <ProjectReference Include="..\GCAllocations\GCAllocations.csproj" />
     <ProjectReference Include="..\GCBasic\GCBasic.csproj" />
     <ProjectReference Include="..\GC\GC.csproj" />
+    <ProjectReference Include="..\Handles\Handles.csproj" />
     <ProjectReference Include="..\Inlining\Inlining.csproj" />
 	  <ProjectReference Include="..\Transitions\Transitions.csproj">
 		  

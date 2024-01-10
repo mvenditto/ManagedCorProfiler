@@ -1,5 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Windows.Win32.System.Diagnostics.ClrProfiling;
 using Windows.Win32.System.WinRT.Metadata;
 using Windows.Win32.System.Com;
@@ -13,7 +12,6 @@ using ULONG32 = uint;
 using mdToken = uint;
 using mdTypeDef = uint;
 using COR_PRF_FRAME_INFO = nuint;
-using System.Diagnostics.CodeAnalysis;
 
 namespace ClrProfiling.Helpers;
 
