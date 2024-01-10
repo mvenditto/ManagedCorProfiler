@@ -8,7 +8,7 @@ namespace TestProfilers
 {
     internal abstract unsafe class TestProfilerBase : CorProfilerCallback2
     {
-        protected ICorProfilerInfo11* ProfilerInfo;
+        protected ICorProfilerInfo13* ProfilerInfo;
         protected ICorProfilerInfo2* ProfilerInfo2;
 
         public override HRESULT Initialize(IUnknown* unknown)
@@ -18,7 +18,7 @@ namespace TestProfilers
             Console.WriteLine("Profiler.dll!Profiler::Initialize");
             Console.Out.Flush();
 
-            var hr = unknown->QueryInterface(ICorProfilerInfo11.IID_Guid, out var pinfo);
+            var hr = unknown->QueryInterface(ICorProfilerInfo13.IID_Guid, out var pinfo);
 
             if (hr.Failed)
             {
@@ -28,7 +28,7 @@ namespace TestProfilers
             }
             else
             {
-                ProfilerInfo = (ICorProfilerInfo11*)pinfo;
+                ProfilerInfo = (ICorProfilerInfo13*)pinfo;
                 ProfilerInfo->AddRef();
                 ProfilerInfo2 = (ICorProfilerInfo2*)pinfo;
             }
