@@ -1,7 +1,6 @@
 ﻿using ClrProfiling.Core;
 using ClrProfiling.Shared;
 using System.Collections.Concurrent;
-using System.Text.Json;
 using Windows.Win32.Foundation;
 using Windows.Win32.System.Com;
 using Windows.Win32.System.Diagnostics.ClrProfiling;
