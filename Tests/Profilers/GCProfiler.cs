@@ -1,9 +1,11 @@
-﻿using CorProf.Bindings;
-using CorProf.Core;
-using CorProf.Shared;
-using Microsoft.Diagnostics.Runtime.Utilities;
+﻿using ClrProfiling.Core;
+using ClrProfiling.Shared;
 using System.Collections.Concurrent;
-using static CorProf.Bindings.COR_PRF_MONITOR;
+using System.Text.Json;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Com;
+using Windows.Win32.System.Diagnostics.ClrProfiling;
+using static Windows.Win32.System.Diagnostics.ClrProfiling.COR_PRF_MONITOR;
 
 namespace TestProfilers
 {
@@ -16,30 +18,31 @@ namespace TestProfilers
         private int _failures;
         private int _pohObjectsSeenRootReferences;
         private int _pohObjectsSeenObjectReferences;
-        private ConcurrentDictionary<ulong, object> _rootReferencesSeen = new();
-        private ConcurrentDictionary<ulong, object> _objectReferencesSeen = new();
+        private ConcurrentDictionary<nuint, object> _rootReferencesSeen = new();
+        private ConcurrentDictionary<nuint, object> _objectReferencesSeen = new();
 
-        public override int Initialize(IUnknown* unknown)
+        public override HRESULT Initialize(IUnknown* unknown)
         {
             base.Initialize(unknown);
 
-            int hr = ProfilerInfo->SetEventMask2((uint) COR_PRF_MONITOR_GC, 0);
+            var hr = ProfilerInfo->SetEventMask2((uint) COR_PRF_MONITOR_GC, 0);
 
-            if (hr < 0)
+            if (hr.Failed)
             {
                 Console.WriteLine($"SetEventMask2 failed with hr=0x{hr:x8}");
                 return hr;
             }
 
-            return HResult.S_OK;
+            return HRESULT.S_OK;
         }
 
-        private int NumPOHObjectsSeen(IEnumerable<ulong> objects)
+        private int NumPOHObjectsSeen(IEnumerable<nuint> objects)
         {
             int count = 0;
-            int hr = 0;
 
-            foreach(ulong objectId in objects)
+            var hr = HRESULT.S_OK;
+
+            foreach (nuint objectId in objects)
             {
                 COR_PRF_GC_GENERATION_RANGE gen;
             
@@ -60,13 +63,13 @@ namespace TestProfilers
             return count;
         }
 
-        public override int GarbageCollectionStarted(int cGenerations, int* generationCollected, CorProf.Bindings.COR_PRF_GC_REASON reason)
+        public override HRESULT GarbageCollectionStarted(int cGenerations, BOOL* generationCollected, COR_PRF_GC_REASON reason)
         {
             using var _ = new ShutdownGuard();
 
             if (ShutdownGuard.HasShutdownStarted())
             {
-                return HResult.S_OK;
+                return HRESULT.S_OK;
             }
 
             var gcStarts = Interlocked.Increment(ref _gcStarts);
@@ -78,22 +81,22 @@ namespace TestProfilers
             {
                 Interlocked.Increment(ref _failures);
                 Console.WriteLine($"GCBasicProfiler::GarbageCollectionStarted: FAIL: Expected GCStart <= GCFinish+2. GCStart={gcStarts}, GCFinish={gcFinishes}");
-                return HResult.S_OK;
+                return HRESULT.S_OK;
             }
 
             _rootReferencesSeen.Clear();
             _objectReferencesSeen.Clear();
 
-            return HResult.S_OK;
+            return HRESULT.S_OK;
         }
 
-        public override int GarbageCollectionFinished()
+        public override HRESULT GarbageCollectionFinished()
         {
             using var _ = new ShutdownGuard();
 
             if (ShutdownGuard.HasShutdownStarted())
             {
-                return HResult.S_OK;
+                return HRESULT.S_OK;
             }
 
             var gcFinishes = Interlocked.Increment(ref _gcFinishes);
@@ -108,16 +111,16 @@ namespace TestProfilers
             Interlocked.Add(ref _pohObjectsSeenObjectReferences, NumPOHObjectsSeen(_objectReferencesSeen.Keys));
             Interlocked.Add(ref _pohObjectsSeenRootReferences, NumPOHObjectsSeen(_rootReferencesSeen.Keys));
 
-            return HResult.S_OK;
+            return HRESULT.S_OK;
         }
 
-        public override int ObjectsAllocatedByClass(uint cClassCount, ulong* classIds, uint* cObjects)
+        public override HRESULT ObjectsAllocatedByClass(uint cClassCount, nuint* classIds, uint* cObjects)
         {
             using var _ = new ShutdownGuard();
 
             if (ShutdownGuard.HasShutdownStarted())
             {
-                return HResult.S_OK;
+                return HRESULT.S_OK;
             }
 
 
@@ -131,21 +134,21 @@ namespace TestProfilers
                 Console.WriteLine($"GCProfiler::ObjectsAllocatedByClass: FAIL: Expected ObjectsAllocatedByClass Calls == GCStart. AllocatedByClassCalls={allocatedByClassCalls}, GCStart={gcStarts}"); 
             }
 
-            return HResult.S_OK;
+            return HRESULT.S_OK;
         }
 
-        public override int ObjectReferences(ulong objectId, ulong classId, uint cObjectRefs, ulong* objectRefIds)
+        public override HRESULT ObjectReferences(nuint objectId, nuint classId, uint cObjectRefs, nuint* objectRefIds)
         {
             using var _ = new ShutdownGuard();
 
             if (ShutdownGuard.HasShutdownStarted())
             {
-                return HResult.S_OK;
+                return HRESULT.S_OK;
             }
 
             for (uint i = 0; i < cObjectRefs; i++)
             {
-                ulong obj = objectRefIds[i];
+                nuint obj = objectRefIds[i];
 
                 if (obj != 0)
                 {
@@ -153,21 +156,21 @@ namespace TestProfilers
                 }
             }
 
-            return HResult.S_OK; 
+            return HRESULT.S_OK;
         }
 
-        public override int RootReferences(uint cRootRefs, ulong* rootRefIds) 
+        public override HRESULT RootReferences(uint cRootRefs, nuint* rootRefIds) 
         {
             using var _ = new ShutdownGuard();
 
             if (ShutdownGuard.HasShutdownStarted())
             {
-                return HResult.S_OK;
+                return HRESULT.S_OK;
             }
 
             for (uint i = 0; i < cRootRefs; i++)
             {
-                ulong obj = rootRefIds[i];
+                nuint obj = rootRefIds[i];
 
                 if (obj != 0)
                 {
@@ -175,10 +178,10 @@ namespace TestProfilers
                 }
             }
 
-            return HResult.S_OK;
+            return HRESULT.S_OK;
         }
 
-        public override int Shutdown()
+        public override HRESULT Shutdown()
         {
             base.Shutdown();
 
@@ -210,7 +213,7 @@ namespace TestProfilers
 
             Console.Out.Flush();
 
-            return HResult.S_OK;
+            return HRESULT.S_OK;
         }
     }
 }

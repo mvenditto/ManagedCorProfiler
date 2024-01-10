@@ -1,9 +1,13 @@
-﻿using CorProf.Bindings;
-using CorProf.Core;
-using CorProf.Shared;
+﻿using ClrProfiling.Core;
+using ClrProfiling.Helpers;
+using ClrProfiling.Shared;
 using Microsoft.Diagnostics.Runtime.Utilities;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
-using static CorProf.Bindings.COR_PRF_TRANSITION_REASON;
+
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Com;
+using Windows.Win32.System.Diagnostics.ClrProfiling;
 
 namespace TestProfilers
 {
@@ -44,19 +48,19 @@ namespace TestProfilers
             Console.WriteLine($"PInvoke received i={callback(i)}");
         }
 
-        public override int Initialize(IUnknown* unknown)
+        public override HRESULT Initialize(IUnknown* unknown)
         {
             base.Initialize(unknown);
 
             var eventsLow = COR_PRF_MONITOR.COR_PRF_MONITOR_CODE_TRANSITIONS
                 | COR_PRF_MONITOR.COR_PRF_DISABLE_INLINING;
 
-            int hr = ProfilerInfo->SetEventMask2((uint)eventsLow, 0);
+            var hr = ProfilerInfo->SetEventMask2((uint)eventsLow, 0);
 
-            if (hr < 0)
+            if (hr.Failed)
             {
                 Console.WriteLine($"SetEventMask2 failed with hr=0x{hr:x8}");
-                return HResult.E_FAIL;
+                return HRESULT.E_FAIL;
             }
 
             // exploit the fact the we are actually injected in the profilee process
@@ -71,20 +75,19 @@ namespace TestProfilers
             _pinvoke = new TransitionInstance();
             _reversePinvoke = new TransitionInstance();
 
-            Console.WriteLine("Profiler.dll!Profiler::Initialize: OK.");
-
-            return HResult.S_OK;
+            return HRESULT.S_OK;
         }
 
         private bool FunctionIsTargetFunction(
-            ulong functionId,
-            out TransitionInstance? inst,
+            nuint functionId,
+            [MaybeNull] out TransitionInstance inst,
             out string funcName)
         {
             inst = null;
-            int hr = ProfilerInfoHelpers.GetFunctionIDName(functionId, out funcName);
 
-            if (hr < 0)
+            var hr = ProfilerInfoHelpers.GetFunctionFullyQualifiedName(ProfilerInfo2, functionId, out funcName);
+
+            if (hr.Failed)
             {
                 Console.WriteLine($"GetFunctionIDName error 0x{hr:x8}");
             }
@@ -107,14 +110,14 @@ namespace TestProfilers
             return true;
         }
 
-        public override int ManagedToUnmanagedTransition(ulong functionId, COR_PRF_TRANSITION_REASON reason)
+        public override HRESULT ManagedToUnmanagedTransition(nuint functionId, COR_PRF_TRANSITION_REASON reason)
         {
             using var _ = new ShutdownGuard();
 
             if (ShutdownGuard.HasShutdownStarted())
             {
                 Console.WriteLine("Shutting-down: abort callback...");
-                return HResult.S_OK;
+                return HRESULT.S_OK;
             }
 
             if (FunctionIsTargetFunction(functionId, out TransitionInstance? inst, out string funcName) && inst != null)
@@ -130,18 +133,17 @@ namespace TestProfilers
                 }
                 inst.ManagedToUnmanaged = reason;
             }
-
-            return HResult.S_OK;
+            return HRESULT.S_OK;
         }
 
-        public override int UnmanagedToManagedTransition(ulong functionId, COR_PRF_TRANSITION_REASON reason)
+        public override HRESULT UnmanagedToManagedTransition(nuint functionId, COR_PRF_TRANSITION_REASON reason)
         {
             using var _ = new ShutdownGuard();
 
             if (ShutdownGuard.HasShutdownStarted())
             {
                 Console.WriteLine("Shutting-down: abort callback...");
-                return HResult.S_OK;
+                return HRESULT.S_OK;
             }
 
             if (FunctionIsTargetFunction(functionId, out TransitionInstance? inst, out string funcName) && inst != null)
@@ -158,18 +160,18 @@ namespace TestProfilers
                 inst.UnmanagedToManaged = reason;
             }
 
-            return HResult.S_OK;
+            return HRESULT.S_OK;
         }
 
-        public override int Shutdown()
+        public override HRESULT Shutdown()
         {
             base.Shutdown();
 
-            bool successPinvoke = _pinvoke.ManagedToUnmanaged == COR_PRF_TRANSITION_CALL
-                    && _pinvoke.UnmanagedToManaged == COR_PRF_TRANSITION_RETURN;
+            bool successPinvoke = _pinvoke.ManagedToUnmanaged == COR_PRF_TRANSITION_REASON.COR_PRF_TRANSITION_CALL
+                    && _pinvoke.UnmanagedToManaged == COR_PRF_TRANSITION_REASON.COR_PRF_TRANSITION_RETURN;
 
-            bool successReversePinvoke = _reversePinvoke.ManagedToUnmanaged == COR_PRF_TRANSITION_RETURN
-                            && _reversePinvoke.UnmanagedToManaged == COR_PRF_TRANSITION_CALL;
+            bool successReversePinvoke = _reversePinvoke.ManagedToUnmanaged == COR_PRF_TRANSITION_REASON.COR_PRF_TRANSITION_RETURN
+                            && _reversePinvoke.UnmanagedToManaged == COR_PRF_TRANSITION_REASON.COR_PRF_TRANSITION_CALL;
 
             if (_failures == 0 && successPinvoke && successReversePinvoke)
             {
@@ -180,7 +182,7 @@ namespace TestProfilers
                 Console.WriteLine($"Test failed _failures={_failures} _pinvoke={successPinvoke} _reversePinvoke={successReversePinvoke}");
             }
 
-            return HResult.S_OK;
+            return HRESULT.S_OK;
         }
     }
 }

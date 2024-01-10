@@ -8,6 +8,8 @@
     <IsPackable>false</IsPackable>
 
     <Platforms>AnyCPU;x64</Platforms>
+
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,8 +31,8 @@
     <ProjectReference Include="..\GCBasic\GCBasic.csproj" />
     <ProjectReference Include="..\GC\GC.csproj" />
     <ProjectReference Include="..\Inlining\Inlining.csproj" />
-    <ProjectReference Include="..\Profilers\Tests.Profilers.csproj" />
-    <ProjectReference Include="..\Transitions\Transitions.csproj" />
+	  <ProjectReference Include="..\Transitions\Transitions.csproj">
+		  
+	  </ProjectReference>
   </ItemGroup>
-
 </Project>

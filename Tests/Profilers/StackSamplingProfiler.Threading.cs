@@ -1,17 +1,16 @@
-﻿using CorProf.Bindings;
-using CorProf.Core;
-using CorProf.Profiling.Extensions;
-using CorProf.Profiling.Threading;
-using Microsoft.Diagnostics.Runtime.Utilities;
+﻿using ClrProfiling.Core;
+using ClrProfiling.Backend.Extensions;
+using ClrProfiling.Backend.Threading;
 using Serilog;
-using Windows.Win32.Foundation;
 using Serilog.Extensions.Logging;
 using Microsoft.Extensions.Logging;
-using CorProf.Helpers;
+using ClrProfiling.Helpers;
 using System.Buffers;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Com;
+using Windows.Win32.System.Diagnostics.ClrProfiling;
 
-using CorProf.Profiling.Windows64;
-using CorProf.Profiling.Abstractions;
+using ClrProfiling.Backend.Windows;
 
 namespace TestProfilers;
 
@@ -40,18 +39,18 @@ internal unsafe class StackSamplingProfiler_Threading : TestProfilerBase
             profilerInfo: (ICorProfilerInfo4*)ProfilerInfo);
     }
 
-    public override int Initialize(IUnknown* unknown)
+    public override HRESULT Initialize(IUnknown* unknown)
     {
         var hr = base.Initialize(unknown);
 
-        if (hr != HResult.S_OK)
+        if (hr.Failed)
         {
             return hr;
         }
 
         hr = ProfilerInfo->SetEventMask2((uint)COR_PRF_MONITOR.COR_PRF_MONITOR_THREADS, 0);
 
-        if (hr < 0)
+        if (hr.Failed)
         {
             Console.WriteLine($"SetEventMask2 failed with hr=0x{hr:x8}");
             return hr;
@@ -60,44 +59,44 @@ internal unsafe class StackSamplingProfiler_Threading : TestProfilerBase
         return hr;
     }
 
-    public override int ThreadCreated(ulong threadId)
+    public override HRESULT ThreadCreated(nuint threadId)
     {
         _threadRegistry.RegisterThread(threadId);
         Interlocked.Increment(ref _seenThreads);
-        return HResult.S_OK;
+        return HRESULT.S_OK;
     }
 
-    public override int ThreadDestroyed(ulong threadId)
+    public override HRESULT ThreadDestroyed(nuint threadId)
     {
         // _threadRegistry.TryUnregisterThread(threadId, out _);
-        return HResult.S_OK;
+        return HRESULT.S_OK;
     }
 
-    public override int ThreadAssignedToOSThread(ulong managedThreadId, uint osThreadId)
+    public override HRESULT ThreadAssignedToOSThread(nuint managedThreadId, uint osThreadId)
     {
         var realThreadHandle = _threadManager.GetThreadHandle(managedThreadId);
 
         _threadRegistry.SetOSThreadInfo(managedThreadId, osThreadId, realThreadHandle);
 
-        return HResult.S_OK;
+        return HRESULT.S_OK;
     }
 
     // NOTE: It seems thread callbacks are not guaranteed to be ordered.
     // hence ThreadNameChanged() may be called before ThreadCreated().
-    public override unsafe int ThreadNameChanged(ulong threadId, uint cchName, ushort* name)
+    public override unsafe HRESULT ThreadNameChanged(nuint threadId, uint cchName, PWSTR name)
     {
         var threadName = cchName == 0 
             ? string.Empty
-            : MarshalHelpers.PtrToStringUtf16(name);
+            : MarshalHelpers.PtrToStringUtf16((ushort*)name.Value);
 
         _threadRegistry.SetThreadName(threadId, threadName);
 
         Log.Logger.Debug("ThreadNameChanged: 0x{ThreadId:x8} -> '{ThreadName}'", threadId, threadName);
 
-        return HResult.S_OK;
+        return HRESULT.S_OK;
     }
 
-    public override int Shutdown()
+    public override HRESULT Shutdown()
     {
         base.Shutdown();
 
@@ -109,7 +108,7 @@ internal unsafe class StackSamplingProfiler_Threading : TestProfilerBase
 
         if (threads.Length < _seenThreads)
         {
-            return HResult.S_OK;
+            return HRESULT.S_OK;
         }
 
         var names = threads.Select(x => x.Value.ThreadName)
@@ -141,6 +140,6 @@ internal unsafe class StackSamplingProfiler_Threading : TestProfilerBase
 
         Console.Out.Flush();
 
-        return HResult.S_OK;
+        return HRESULT.S_OK;
     }
 }

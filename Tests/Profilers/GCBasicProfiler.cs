@@ -1,8 +1,9 @@
-﻿using CorProf.Bindings;
-using CorProf.Core;
-using CorProf.Helpers;
-using CorProf.Shared;
-using Microsoft.Diagnostics.Runtime.Utilities;
+﻿using ClrProfiling.Core;
+using ClrProfiling.Helpers;
+using ClrProfiling.Shared;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Com;
+using Windows.Win32.System.Diagnostics.ClrProfiling;
 
 namespace TestProfilers
 {
@@ -13,25 +14,24 @@ namespace TestProfilers
         private int _gcFinishes = 0;
         private int _gcFailures = 0;
 
-        public override int Initialize(IUnknown* unknown)
+        public override HRESULT Initialize(IUnknown* unknown)
         {
             base.Initialize(unknown);
 
             var eventsHigh = COR_PRF_HIGH_MONITOR.COR_PRF_HIGH_BASIC_GC;
 
-            int hr = ProfilerInfo->SetEventMask2(0, (uint) eventsHigh);
+            var hr = ProfilerInfo->SetEventMask2(0, (uint) eventsHigh);
 
-            if (hr < 0)
+            if (hr.Failed)
             {
                 Console.WriteLine($"SetEventMask2 failed with hr=0x{hr:x8}");
                 return hr;
             }
 
-            return HResult.S_OK;
+            return HRESULT.S_OK;
         }
 
-        [ShutdownGuard]
-        public override unsafe int GarbageCollectionStarted(int cGenerations, int* generationCollected, COR_PRF_GC_REASON reason)
+        public override unsafe HRESULT GarbageCollectionStarted(int cGenerations, BOOL* generationCollected, COR_PRF_GC_REASON reason)
         {
             var gcStarts = Interlocked.Increment(ref _gcStarts);
             var gcFinishes = Interlocked.CompareExchange(ref _gcFinishes, 0, 0);
@@ -42,7 +42,7 @@ namespace TestProfilers
             {
                 Interlocked.Increment(ref _gcFailures);
                 Console.WriteLine($"GCBasicProfiler::GarbageCollectionStarted: FAIL: Expected GCStart <= GCFinish+2. GCStart={gcStarts}, GCFinish={gcFinishes}");
-                return HResult.S_OK;
+                return HRESULT.S_OK;
             }
 
             if (gcStarts == 1)
@@ -58,7 +58,7 @@ namespace TestProfilers
                 {
                     Interlocked.Increment(ref _gcFailures);
                     Console.WriteLine($"GCBasicProfiler::GarbageCollectionStarted: FAIL: GetGenerationBounds hr=0x{hr:x8}");
-                    return HResult.S_OK;
+                    return HRESULT.S_OK;
                 }
 
                 if (nObjectRanges <= cRanges)
@@ -82,7 +82,7 @@ namespace TestProfilers
                 {
                     Interlocked.Increment(ref _gcFailures);
                     Console.WriteLine($"GCBasicProfiler::GarbageCollectionStarted: FAIL: GetGenerationBounds hr=0x{hr:x8} {nObjectRanges} {nObjectRanges2}");
-                    return HResult.S_OK;
+                    return HRESULT.S_OK;
                 }
 
                 for (int i = (int)(nObjectRanges - 1); i >= 0; i--)
@@ -110,11 +110,10 @@ namespace TestProfilers
                 }
             }
 
-            return HResult.S_OK;
+            return HRESULT.S_OK;
         }
 
-        [ShutdownGuard]
-        public override int GarbageCollectionFinished()
+        public override HRESULT GarbageCollectionFinished()
         {
             var gcFinishes = Interlocked.Increment(ref _gcFinishes);
             var gcStarts = Interlocked.CompareExchange(ref _gcStarts, 0, 0);
@@ -125,10 +124,10 @@ namespace TestProfilers
                 Console.WriteLine($"GCBasicProfiler::GarbageCollectionFinished: FAIL: Expected GCStart >= GCFinish. Start={gcStarts}, Finish={gcFinishes}");
             }
 
-            return HResult.S_OK;
+            return HRESULT.S_OK;
         }
 
-        public override int Shutdown()
+        public override HRESULT Shutdown()
         {
             base.Shutdown();
 
@@ -151,7 +150,7 @@ namespace TestProfilers
 
             Console.Out.Flush();
 
-            return HResult.S_OK;
+            return HRESULT.S_OK;
         }
     }
 }

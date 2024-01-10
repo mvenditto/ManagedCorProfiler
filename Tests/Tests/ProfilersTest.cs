@@ -1,4 +1,5 @@
 using Profiler.Tests;
+using System.Runtime.InteropServices;
 using Tests.Common;
 using Xunit;
 using Xunit.Abstractions;
@@ -40,7 +41,7 @@ namespace Tests
         [Fact]
         public void TransitionsTest()
         {
-            Assert.Equal(100, Transitions.Main(NoArgs));
+            Assert.Equal(100, Transitions.ExecuteTest(NoArgs, _outputHelper));
         }
 
         [Fact]

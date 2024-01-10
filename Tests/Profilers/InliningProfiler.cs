@@ -1,44 +1,43 @@
-﻿using CorProf.Bindings;
-using CorProf.Core;
-using CorProf.Helpers;
-using CorProf.Shared;
-using CorProf.Utilities;
-using Microsoft.Diagnostics.Runtime.Utilities;
-using System;
+﻿using ClrProfiling.Core;
+using ClrProfiling.Core.Helpers;
+using ClrProfiling.Helpers;
+using ClrProfiling.Hooks;
+using ClrProfiling.Shared;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Tests.Common;
-using static CorProf.Bindings.COR_PRF_MONITOR;
+
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Com;
+using Windows.Win32.System.Diagnostics.ClrProfiling;
+using static Windows.Win32.System.Diagnostics.ClrProfiling.COR_PRF_MONITOR;
 
 namespace TestProfilers
 {
     [ProfilerCallback("DDADC0CB-21C8-4E53-9A6C-7C65EE5800CE")]
-    internal unsafe class InliningProfiler: TestProfilerBase
+    internal unsafe class InliningProfiler : TestProfilerBase
     {
         private static int _failures;
 
-        // bool actually
+        // BOOL actually
         private static int _sawInlineeCall;
         private static int _inInlining;
         private static int _inBlockInlining;
         private static int _inNoResponse;
 
-        private static ICorProfilerInfo11* _sProfilerInfo;
-        private static ICorProfilerInfoHelpers2 _sProfilerInfoHelpers;
+        private static ICorProfilerInfo2* _sProfilerInfo;
 
         [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
-        private static void EnterStub(FunctionIDOrClientID functionOrClientId, ulong eltInfo)
+        private static void EnterStub(FunctionIDOrClientID functionOrClientId, nuint eltInfo)
         {
-            // SHUTDOWNGUARD_RETVOID();
             if (ShutdownGuard.HasShutdownStarted())
             {
                 return;
             }
 
-            // Console.WriteLine($"> ENTER functionId=0x{functionOrClientId.functionID:x8} clientId=0x{functionOrClientId.clientID:x8}");
-
-            int hr = _sProfilerInfoHelpers.GetFunctionFullyQualifiedName
-                (functionOrClientId.functionID, 
+            int hr = ProfilerInfoHelpers.GetFunctionIDName(
+                _sProfilerInfo,
+                functionOrClientId.functionID,
                 out string functionName);
 
             if (hr < 0)
@@ -49,49 +48,48 @@ namespace TestProfilers
 
             if (functionName == "Inlining")
             {
-                Console.WriteLine($">>> {functionName}");
-                Interlocked.Exchange(ref _inInlining, Bool.TRUE);
+                Console.WriteLine($"ENTER: {functionName}");
+                Interlocked.Exchange(ref _inInlining, 1);
             }
             else if (functionName == "BlockInlining")
             {
-                Console.WriteLine($">>> {functionName}");
-                Interlocked.Exchange(ref _inBlockInlining, Bool.TRUE);
+                Console.WriteLine($"ENTER: {functionName}");
+                Interlocked.Exchange(ref _inBlockInlining, 1);
             }
-            else if (functionName =="NoResponse")
+            else if (functionName == "NoResponse")
             {
-                Console.WriteLine($">>> {functionName}");
-                Interlocked.Exchange(ref _inNoResponse, Bool.TRUE);
+                Console.WriteLine($"ENTER: {functionName}");
+                Interlocked.Exchange(ref _inNoResponse, 1);
             }
             else if (functionName == "Inlinee")
             {
-                Console.WriteLine($">>> {functionName}");
-                if (Interlocked.CompareExchange(ref _inInlining, 0, 0) == Bool.TRUE
-                 || Interlocked.CompareExchange(ref _inNoResponse, 0, 0) == Bool.TRUE)
+                Console.WriteLine($"ENTER: {functionName}");
+                if (Interlocked.CompareExchange(ref _inInlining, 0, 0) == 1
+                 || Interlocked.CompareExchange(ref _inNoResponse, 0, 0) == 1)
                 {
                     Interlocked.Increment(ref _failures);
                     Console.WriteLine("Saw Inlinee as a real method call instead of inlined.");
                 }
 
-                if (Interlocked.CompareExchange(ref _inBlockInlining, 0, 0) == Bool.TRUE)
+                if (Interlocked.CompareExchange(ref _inBlockInlining, 0, 0) == 1)
                 {
-                    Interlocked.Exchange(ref _sawInlineeCall, Bool.TRUE);
+                    Interlocked.Exchange(ref _sawInlineeCall, 1);
                 }
             }
-
-            // Console.WriteLine("<ENTER");
         }
 
         [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
-        private static void LeaveStub(FunctionIDOrClientID functionOrClientId, ulong eltInfo)
+        private static void LeaveStub(FunctionIDOrClientID functionOrClientId, nuint eltInfo)
         {
             if (ShutdownGuard.HasShutdownStarted())
             {
                 return;
             }
 
-            // Console.WriteLine(">LEAVE");
-
-            int hr = _sProfilerInfoHelpers.GetFunctionIDName(functionOrClientId.functionID, out string functionName);
+            int hr = ProfilerInfoHelpers.GetFunctionIDName(
+                _sProfilerInfo, 
+                functionOrClientId.functionID, 
+                out string functionName);
 
             if (hr < 0)
             {
@@ -101,25 +99,23 @@ namespace TestProfilers
 
             if (functionName == "Inlining")
             {
-                Console.WriteLine($"<<< {functionName}");
-                Interlocked.Exchange(ref _inInlining, Bool.FALSE);
+                Console.WriteLine($"LEAVE: {functionName}");
+                Interlocked.Exchange(ref _inInlining, 0);
             }
             else if (functionName == "BlockInlining")
             {
-                Console.WriteLine($"<<< {functionName}");
-                Interlocked.Exchange(ref _inBlockInlining, Bool.FALSE);
+                Console.WriteLine($"LEAVE: {functionName}");
+                Interlocked.Exchange(ref _inBlockInlining, 0);
             }
             else if (functionName == "NoResponse")
             {
-                Console.WriteLine($"<<< {functionName}");
-                Interlocked.Exchange(ref _inNoResponse, Bool.FALSE);
+                Console.WriteLine($"LEAVE: {functionName}");
+                Interlocked.Exchange(ref _inNoResponse, 0);
             }
-
-            // Console.WriteLine("<LEAVE");
         }
 
         [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
-        private static void TailcallStub(FunctionIDOrClientID functionOrClientId, ulong eltInfo)
+        private static void TailcallStub(FunctionIDOrClientID functionOrClientId, nuint eltInfo)
         {
             if (ShutdownGuard.HasShutdownStarted())
             {
@@ -127,104 +123,113 @@ namespace TestProfilers
             }
         }
 
-        public override unsafe int Initialize(IUnknown* unknown)
+        public override unsafe HRESULT Initialize(IUnknown* unknown)
         {
             base.Initialize(unknown);
 
-            _sProfilerInfo = ProfilerInfo;
-            _sProfilerInfoHelpers = ProfilerInfoHelpers;
+            _sProfilerInfo = ProfilerInfo2;
 
-            int hr = ProfilerInfo->SetEventMask2((uint)(COR_PRF_MONITOR_ENTERLEAVE
+            var hr = ProfilerInfo->SetEventMask2((uint)(COR_PRF_MONITOR_ENTERLEAVE
                                                     | COR_PRF_ENABLE_FUNCTION_ARGS
                                                     | COR_PRF_ENABLE_FUNCTION_RETVAL
                                                     | COR_PRF_ENABLE_FRAME_INFO
-                                                    | COR_PRF_MONITOR_JIT_COMPILATION), 
+                                                    | COR_PRF_MONITOR_JIT_COMPILATION),
                                                     0);
-            Console.WriteLine("LOAD HOOKS");
             if (hr < 0)
             {
                 Console.WriteLine($"FAIL: IpCorProfilerInfo::SetEventMask2() failed hr=0x{hr:x8}");
                 _failures++;
                 return hr;
             }
-            var hooksLibPath = Path.GetFullPath(@"..\..\..\..\Profilers\bin\profiler\hooks.dll");
+
+            var hooksLibPath = Path.GetFullPath(@"..\..\..\..\..\Profilers\bin\profiler\hooks.dll");
+
             Console.WriteLine(hooksLibPath);
-            EnterLeaveHooks3WithInfo.Initialize(hooksLibPath);
 
-            EnterLeaveHooks3WithInfo.EnterLeaveCallbacks->Enter = &EnterStub;
-            EnterLeaveHooks3WithInfo.EnterLeaveCallbacks->Leave = &LeaveStub;
-            EnterLeaveHooks3WithInfo.EnterLeaveCallbacks->Tailcall = &TailcallStub;
+            hr = EnterLeaveFunctionHooks3WithInfo.Initialize(hooksLibPath);
 
-            EnterLeaveHooks3WithInfo.SetCallbacks(EnterLeaveHooks3WithInfo.EnterLeaveCallbacks);
-
-            hr = ProfilerInfo->SetEnterLeaveFunctionHooks3WithInfo(
-                (delegate* unmanaged[Stdcall]<FunctionIDOrClientID, ulong, void>)EnterLeaveHooks3WithInfo.EnterNaked3WithInfo,
-                (delegate* unmanaged[Stdcall]<FunctionIDOrClientID, ulong, void>)EnterLeaveHooks3WithInfo.LeaveNaked3WithInfo,
-                (delegate* unmanaged[Stdcall]<FunctionIDOrClientID, ulong, void>)EnterLeaveHooks3WithInfo.TailcallNaked3WithInfo);
-
-            if (hr < 0)
+            if (hr.Failed)
             {
-                Console.WriteLine($"Error SetEnterLeaveFunctionHooks3WithInfo hr={hr}");
-                return HResult.E_FAIL;
+                Console.WriteLine($"FAIL EnterLeaveFunctionHooks3WithInfo::Initialize hr={hr}");
+                EnterLeaveFunctionHooks3WithInfo.Cleanup();
+                return HRESULT.E_FAIL;
             }
 
-            return HResult.S_OK;
+            hr = EnterLeaveFunctionHooks3WithInfo.Register(
+                (ICorProfilerInfo10*)_sProfilerInfo,
+                &EnterStub,
+                &LeaveStub,
+                &TailcallStub);
+
+            if (hr.Failed)
+            {
+                Console.WriteLine($"FAIL SetEnterLeaveFunctionHooks3WithInfo::Register hr={hr}");
+                EnterLeaveFunctionHooks3WithInfo.Cleanup();
+                return HRESULT.E_FAIL;
+            }
+
+            Console.WriteLine($"{nameof(InliningProfiler)}::Initialize() -> OK");
+
+            return HRESULT.S_OK;
         }
 
-        public override unsafe int JITInlining(ulong callerId, ulong calleeId, int* pfShouldInline)
+        public override unsafe HRESULT JITInlining(nuint callerId, nuint calleeId, BOOL* pfShouldInline)
         {
             using var shutdownGuard = new ShutdownGuard();
 
             if (ShutdownGuard.HasShutdownStarted())
             {
-                return HResult.S_OK;
+                Console.WriteLine("HasShutdownStarted: TRUE.");
+                return HRESULT.S_OK;
             }
 
             Console.WriteLine("JITInlining");
 
             int hr = ProfilerInfoHelpers.GetFunctionIDName(
+                ProfilerInfo2,
                 calleeId,
                 out string inlineeName);
 
             if (hr < 0)
             {
                 Console.WriteLine($"Cannot GetFunctionIDFullyQualifiedName of JITInlining CALLEE, hr=0x{hr:x8}");
-                return HResult.S_OK;
+                return HRESULT.S_OK;
             }
 
             if (inlineeName == "Inlinee")
             {
                 Console.WriteLine("JITInlining: Inlinee");
                 hr = ProfilerInfoHelpers.GetFunctionIDName(
+                    ProfilerInfo2,
                     callerId,
                     out string inlinerName);
 
                 if (hr < 0)
                 {
                     Console.WriteLine($"Cannot GetFunctionIDFullyQualifiedName of JITInlining CALLER, hr=0x{hr:x8}");
-                    return HResult.S_OK;
+                    return HRESULT.S_OK;
                 }
 
                 if (inlinerName == "Inlining")
                 {
                     Console.WriteLine("JIT: Inlining");
-                    *pfShouldInline = Bool.TRUE;
+                    *pfShouldInline = true;
                 }
                 else if (inlinerName == "BlockInlining")
                 {
                     Console.WriteLine("JIT: BlockInlining");
-                    *pfShouldInline = Bool.FALSE;
+                    *pfShouldInline = false;
                 }
             }
-            return HResult.S_OK;
+            return HRESULT.S_OK;
         }
 
-        public override int Shutdown()
+        public override HRESULT Shutdown()
         {
             base.Shutdown();
 
-            if (Interlocked.CompareExchange(ref _failures, 0, 0) == 0 && 
-                Interlocked.CompareExchange(ref _sawInlineeCall, 0, 0) == Bool.TRUE)
+            if (Interlocked.CompareExchange(ref _failures, 0, 0) == 0 &&
+                Interlocked.CompareExchange(ref _sawInlineeCall, 0, 0) == 1)
             {
                 Console.WriteLine("PROFILER TEST PASSES");
             }
@@ -237,9 +242,9 @@ namespace TestProfilers
 
             Console.Out.Flush();
 
-            // EnterLeaveHooks3WithInfo.Cleanup();
+            EnterLeaveFunctionHooks3WithInfo.Cleanup();
 
-            return HResult.S_OK;
+            return HRESULT.S_OK;
         }
     }
 }

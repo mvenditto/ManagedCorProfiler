@@ -2,10 +2,15 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using CorProf.Bindings;
-using CorProf.Core;
-using CorProf.Utilities;
-using CorProf.Core.Abstractions;
+using ClrProfiling.Core;
+using ClrProfiling.Core.Abstractions;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Com;
+using Windows.Win32.System.WinRT.Metadata;
+using Windows.Win32.System.Diagnostics.ClrProfiling;
+using ClrProfiling.Helpers;
+
+using ULONG32 = uint;
 
 namespace MyProfiler
 {
@@ -17,9 +22,9 @@ namespace MyProfiler
         [StructLayout(LayoutKind.Sequential)]
         private unsafe struct EnterLeavelCallbacks2
         {
-            public delegate* unmanaged[Stdcall]<ulong, ulong, ulong, COR_PRF_FUNCTION_ARGUMENT_INFO*, void> Enter;
-            public delegate* unmanaged[Stdcall]<ulong, ulong, ulong, COR_PRF_FUNCTION_ARGUMENT_RANGE*, void> Leave;
-            public delegate* unmanaged[Stdcall]<ulong, ulong, ulong, void> Tailcall;
+            public delegate* unmanaged[Stdcall]<nuint, nuint, nuint, COR_PRF_FUNCTION_ARGUMENT_INFO*, void> Enter;
+            public delegate* unmanaged[Stdcall]<nuint, nuint, nuint, COR_PRF_FUNCTION_ARGUMENT_RANGE*, void> Leave;
+            public delegate* unmanaged[Stdcall]<nuint, nuint, nuint, void> Tailcall;
             public void* ProfilerInfo;
         }
 
@@ -27,19 +32,19 @@ namespace MyProfiler
             (EnterLeavelCallbacks2*)NativeMemory.Alloc((nuint)sizeof(EnterLeavelCallbacks2));
 
         [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
-        private static ulong FunctionIDMapper(ulong functionId, int* pbHookFunction)
+        private static nuint FunctionIDMapper(nuint functionId, BOOL* pbHookFunction)
         {
-            *pbHookFunction = Bool.TRUE;
-            return (ulong) EnterLeaveCallbacks; 
+            *pbHookFunction = new BOOL(1); // true
+            return (nuint) EnterLeaveCallbacks; 
         }
 
         [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
-        private static void EnterStub(ulong functionId, ulong clientData, ulong func, COR_PRF_FUNCTION_ARGUMENT_INFO* f)
+        private static void EnterStub(nuint functionId, nuint clientData, nuint func, COR_PRF_FUNCTION_ARGUMENT_INFO* f)
         {
             var profInfo = (ICorProfilerInfo2*)((EnterLeavelCallbacks2*) clientData)->ProfilerInfo;
 
-            ulong classId = 0;
-            ulong moduleId = 0;
+            nuint classId = 0;
+            nuint moduleId = 0;
             uint token = 0;
 
             var hr = profInfo->GetFunctionInfo2(
@@ -60,7 +65,7 @@ namespace MyProfiler
 
             var iMetaDataImportIID = new Guid(0x7dac8207, 0xd3ae, 0x4c75, 0x9b, 0x67, 0x92, 0x80, 0x1a, 0x49, 0x7d, 0x44);
 
-            var ptr = (CorProf.Bindings.IUnknown*) NativeMemory.Alloc((nuint)sizeof(nint));
+            var ptr = (IUnknown*) NativeMemory.Alloc((nuint)sizeof(nint));
 
             hr = profInfo->GetModuleMetaData(
                 moduleId,
@@ -75,10 +80,21 @@ namespace MyProfiler
 
             var metadataImport = (IMetaDataImport*)ptr;
 
-            var szName = (ushort*)NativeMemory.Alloc(sizeof(ushort) * 300);
+            using var buff = NativeBuffer<ushort>.Alloc(300);
 
-            metadataImport->GetMethodProps(
-                (uint)token, null, szName, 300, null, null, null, null, null, null);
+            var szName = new PWSTR((char*)buff.Pointer);
+
+            hr = metadataImport->GetMethodProps(
+                token,
+                (ULONG32*)0,
+                szName,
+                buff.Length,
+                (ULONG32*)0,
+                (ULONG32*)0,
+                (byte**)0,
+                (ULONG32*)0,
+                (ULONG32*)0,
+                (ULONG32*)0);
 
             if (hr < 0)
             {
@@ -86,7 +102,7 @@ namespace MyProfiler
             }
             else
             {
-                var funcName = Marshal.PtrToStringUni((nint)szName);
+                var funcName = Marshal.PtrToStringUni(buff);
 
                 Console.WriteLine($"=> {funcName}()");
             }
@@ -95,13 +111,13 @@ namespace MyProfiler
         }
 
         [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
-        private static void LeaveStub(ulong functionId, ulong clientData, ulong func, COR_PRF_FUNCTION_ARGUMENT_RANGE* f)
+        private static void LeaveStub(nuint functionId, nuint clientData, nuint func, COR_PRF_FUNCTION_ARGUMENT_RANGE* f)
         {
             //Console.WriteLine("LEAVE");
         }
 
         [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
-        private static void TailcallStub(ulong functionId, ulong clientData, ulong frameInfo)
+        private static void TailcallStub(nuint functionId, nuint clientData, nuint frameInfo)
         {
             //Console.WriteLine("TAILCALL");
         }
@@ -152,11 +168,11 @@ namespace MyProfiler
         }
         #endregion
 
-        public override int Initialize(CorProf.Bindings.IUnknown* unknown)
+        public override HRESULT Initialize(IUnknown* unknown)
         {
             Console.Write("MyProfiler!Initialize");
 
-            var guid_ = CorProfConsts.IID_ICorProfilerInfo2;
+            var guid_ = ICorProfilerInfo2.IID_Guid;
 
             var hr = Marshal.QueryInterface((nint)unknown, ref guid_, out var pinfo);
 
@@ -165,7 +181,7 @@ namespace MyProfiler
             if (hr < 0)
             {
                 Console.WriteLine($"Error hr=0x{hr:X8}");
-                return HResult.E_FAIL;
+                return HRESULT.E_FAIL;
             }
 
             // see https://learn.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/cor-prf-monitor-enumeration
@@ -195,7 +211,7 @@ namespace MyProfiler
             if (hr < 0)
             {
                 Console.WriteLine($"Error hr={hr}");
-                return HResult.E_FAIL;
+                return HRESULT.E_FAIL;
             }
 
             InitHooks();
@@ -207,39 +223,43 @@ namespace MyProfiler
             if (hr < 0)
             {
                 Console.WriteLine($"Error SetFunctionIDMapper hr={hr}");
-                return HResult.E_FAIL;
+                return HRESULT.E_FAIL;
             }
 
             hr = _profilerInfo->SetEnterLeaveFunctionHooks2(
-                (delegate* unmanaged[Stdcall]<ulong, ulong, ulong, COR_PRF_FUNCTION_ARGUMENT_INFO*, void>)EnterNaked2,
-                (delegate* unmanaged[Stdcall]<ulong, ulong, ulong, COR_PRF_FUNCTION_ARGUMENT_RANGE*, void>)LeaveNaked2,
-                (delegate* unmanaged[Stdcall]<ulong, ulong, ulong, void>)TailcallNaked2
+                (delegate* unmanaged[Stdcall]<nuint, nuint, nuint, COR_PRF_FUNCTION_ARGUMENT_INFO*, void>)EnterNaked2,
+                (delegate* unmanaged[Stdcall]<nuint, nuint, nuint, COR_PRF_FUNCTION_ARGUMENT_RANGE*, void>)LeaveNaked2,
+                (delegate* unmanaged[Stdcall]<nuint, nuint, nuint, void>)TailcallNaked2
             );
 
             if (hr < 0)
             {
                 Console.WriteLine($"Error SetEnterLeaveFunctionHooks2 hr={hr}");
-                return HResult.E_FAIL;
+                return HRESULT.E_FAIL;
             }
             
-            return HResult.S_OK;
+            return HRESULT.S_OK;
         }
 
-        public override int Shutdown() 
+        public override HRESULT Shutdown() 
         {
             NativeMemory.Free(EnterLeaveCallbacks);
             NativeMethods.FreeLibrary(HooksLib);
-            return HResult.S_OK; 
+            return HRESULT.S_OK;
         }
 
-        public override int ModuleLoadFinished(ulong moduleId, int hrStatus)
+        public override HRESULT ModuleLoadFinished(nuint moduleId, HRESULT hrStatus)
         {
             Console.WriteLine($"ICorProfilerCallback!ModuleLoadFinished(0x{moduleId:X8})");
 
             var pbBaseLoadAddr = (byte*)null;
             uint pcchName = 0;
-            ulong assemblyId = 0;
-            var szName = (ushort*)NativeMemory.Alloc(sizeof(ushort) * 300);
+            nuint assemblyId = 0;
+
+
+            using var buff = NativeBuffer<ushort>.Alloc(300);
+
+            var szName = new PWSTR((char*)buff.Pointer);
 
             var hr = _profilerInfo->GetModuleInfo(
                 moduleId,
@@ -252,16 +272,16 @@ namespace MyProfiler
             if (hr < 0)
             {
                 Console.WriteLine($"Error hr=0x{hr:X8}");
-                return HResult.E_FAIL;
+                return HRESULT.E_FAIL;
             }
 
-            var module = Marshal.PtrToStringUni((nint)szName);
+            var module = Marshal.PtrToStringUni(buff);
 
             Console.WriteLine($"Loaded Moudle -> '{module}'");
 
             NativeMemory.Free(szName);
 
-            return HResult.S_OK;
+            return HRESULT.S_OK;
         }
     }
 }

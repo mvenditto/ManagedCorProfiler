@@ -1,15 +1,19 @@
-﻿using CorProf.Bindings;
-using CorProf.Core;
-using CorProf.Profiling.Extensions;
-using CorProf.Profiling.Threading;
+﻿using ClrProfiling.Core;
+using ClrProfiling.Backend.Extensions;
+using ClrProfiling.Backend.Threading;
 using Microsoft.Diagnostics.Runtime.Utilities;
 using Serilog;
 using Serilog.Extensions.Logging;
 using Microsoft.Extensions.Logging;
-using CorProf.Helpers;
-using CorProf.Profiling.Windows64;
+using ClrProfiling.Helpers;
+using ClrProfiling.Backend.Windows;
 using System.Diagnostics;
 using Windows.Win32.Foundation;
+using Tests.Profilers;
+using Windows.Win32.System.Com;
+using Windows.Win32.System.Diagnostics.ClrProfiling;
+using System.Runtime.InteropServices;
+using System.ComponentModel;
 
 namespace TestProfilers;
 
@@ -20,7 +24,7 @@ internal class StackSamplingProfiler_Threading_Suspension : TestProfilerBase
     private bool _targetThreadFound = false;
 
     private readonly SerilogLoggerFactory _loggerFactory;
-    private ulong _targetThreadId;
+    private nuint _targetThreadId;
 
     private readonly Windows64ThreadManager _threadManager;
 
@@ -84,7 +88,7 @@ internal class StackSamplingProfiler_Threading_Suspension : TestProfilerBase
         }).Start();
     }
 
-    public unsafe override int Initialize(IUnknown* unknown)
+    public unsafe override HRESULT Initialize(IUnknown* unknown)
     {
         var hr = base.Initialize(unknown);
 
@@ -106,25 +110,25 @@ internal class StackSamplingProfiler_Threading_Suspension : TestProfilerBase
         return hr;
     }
 
-    public override int ThreadCreated(ulong threadId)
+    public override HRESULT ThreadCreated(nuint threadId)
     {
         _threadRegistry.RegisterThread(threadId);
-        return HResult.S_OK;
+        return HRESULT.S_OK;
     }
 
-    public override int ThreadDestroyed(ulong threadId)
+    public override HRESULT ThreadDestroyed(nuint threadId)
     {
         // _threadRegistry.TryUnregisterThread(threadId, out _);
-        return HResult.S_OK;
+        return HRESULT.S_OK;
     }
 
-    public unsafe override int ThreadAssignedToOSThread(ulong managedThreadId, uint osThreadId)
+    public unsafe override HRESULT ThreadAssignedToOSThread(nuint managedThreadId, uint osThreadId)
     {
         Console.WriteLine($"Thread 0x{managedThreadId:x8} -> 0x{osThreadId:x8}");
 
-        var osThreadHandle = IntPtr.Zero;
+        var osThreadHandle = HANDLE.Null;
 
-        var hr = ProfilerInfo->GetHandleFromThread(managedThreadId, (void**)&osThreadHandle);
+        var hr = ProfilerInfo->GetHandleFromThread(managedThreadId, &osThreadHandle);
 
         if (hr != HResult.S_OK)
         {
@@ -136,27 +140,26 @@ internal class StackSamplingProfiler_Threading_Suspension : TestProfilerBase
 
         var currProcess = Process.GetCurrentProcess();
         var processHandle = new HANDLE(currProcess.Handle);
-        var threadHandle = new HANDLE(osThreadHandle);
 
         const uint THREAD_ALL_ACCESS = 0x1FFFFF;
-        const DUPLICATE_HANDLE_OPTIONS DefaultDuplicateHandleOpts = 0;
 
         var realThreadHandle = HANDLE.Null;
 
         // acquire a real handle instead of a pseudo-handle.
-        hr = Windows.Win32.PInvoke.DuplicateHandle(
+        var result = NativeMethods.DuplicateHandle(
             processHandle,
-            threadHandle,
+            osThreadHandle,
             processHandle,
             &realThreadHandle,
             THREAD_ALL_ACCESS,
-            false,
-            DefaultDuplicateHandleOpts
+            new BOOL(false),
+            0
         );
 
-        if (hr <= HResult.S_OK)
+        if (result == 0)
         {
-            Log.Logger.Warning("FAIL Kernel32::DuplicateHandle() with hr=0x{hr:x8}", hr);
+            var err = Marshal.GetLastWin32Error();
+            Log.Logger.Warning("FAIL Kernel32::DuplicateHandle() with res=0x{err:x8}: {Message}", err, new Win32Exception(err).Message);
             return hr;
         }
 
@@ -164,16 +167,16 @@ internal class StackSamplingProfiler_Threading_Suspension : TestProfilerBase
 
         _threadRegistry.SetOSThreadInfo(managedThreadId, osThreadId, realThreadHandle);
 
-        return HResult.S_OK;
+        return HRESULT.S_OK;
     }
 
     // NOTE: It seems thread callbacks are not guaranteed to be ordered.
     // hence ThreadNameChanged() may be called before ThreadCreated().
-    public override unsafe int ThreadNameChanged(ulong threadId, uint cchName, ushort* name)
+    public override unsafe HRESULT ThreadNameChanged(nuint threadId, uint cchName, PWSTR name)
     {
         var threadName = cchName == 0 
             ? string.Empty
-            : MarshalHelpers.PtrToStringUtf16(name);
+            : MarshalHelpers.PtrToStringUtf16((ushort*)name.Value);
 
         _threadRegistry.SetThreadName(threadId, threadName);
 
@@ -185,10 +188,10 @@ internal class StackSamplingProfiler_Threading_Suspension : TestProfilerBase
             _targetThreadFound = true;
         }
 
-        return HResult.S_OK;
+        return HRESULT.S_OK;
     }
 
-    public override int Shutdown()
+    public override HRESULT Shutdown()
     {
         base.Shutdown();
 
@@ -201,6 +204,6 @@ internal class StackSamplingProfiler_Threading_Suspension : TestProfilerBase
 
         Console.Out.Flush();
 
-        return HResult.S_OK;
+        return HRESULT.S_OK;
     }
 }

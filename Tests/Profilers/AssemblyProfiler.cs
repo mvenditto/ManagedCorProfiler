@@ -1,8 +1,7 @@
-﻿using CorProf.Bindings;
-using CorProf.Core;
-using CorProf.Shared;
-using Microsoft.Diagnostics.Runtime.Utilities;
-using TestProfilers;
+﻿using ClrProfiling.Core;
+using ClrProfiling.Shared;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Com;
 
 namespace TestProfilers;
 
@@ -12,40 +11,40 @@ internal unsafe class AssemblyProfiler : TestProfilerBase
     private int _assemblyUnloadStartedCount = 0;
     private int _assemblyUnloadFinishedCount = 0;
 
-    public override int Initialize(IUnknown* unknown)
+    public override HRESULT Initialize(IUnknown* unknown)
     {
         return base.Initialize(unknown);
     }
 
-    public override int AssemblyUnloadStarted(ulong assemblyId)
+    public override HRESULT AssemblyUnloadStarted(nuint assemblyId)
     {
         using var _ = new ShutdownGuard();
 
         if (ShutdownGuard.HasShutdownStarted())
         {
-            return HResult.S_OK;
+            return HRESULT.S_OK;
         }
 
         _assemblyUnloadStartedCount++;
 
-        return HResult.S_OK;
+        return HRESULT.S_OK;
     }
 
-    public override int AssemblyUnloadFinished(ulong assemblyId, int hrStatus)
+    public override HRESULT AssemblyUnloadFinished(nuint assemblyId, HRESULT hrStatus)
     {
         using var _ = new ShutdownGuard();
 
         if (ShutdownGuard.HasShutdownStarted())
         {
-            return HResult.S_OK;
+            return HRESULT.S_OK;
         }
 
         _assemblyUnloadFinishedCount++;
 
-        return HResult.S_OK;
+        return HRESULT.S_OK;
     }
 
-    public override int Shutdown()
+    public override HRESULT Shutdown()
     {
         base.Shutdown();
 
@@ -60,6 +59,6 @@ internal unsafe class AssemblyProfiler : TestProfilerBase
 
         Console.Out.Flush();
 
-        return HResult.S_OK;
+        return HRESULT.S_OK;
     }
 }

@@ -1,30 +1,32 @@
-﻿using Microsoft.Diagnostics.Runtime.Utilities;
-using CorProf.Bindings;
-using CorProf.Core;
-using CorProf.Shared;
-using static CorProf.Bindings.COR_PRF_MONITOR;
-using static CorProf.Bindings.COR_PRF_HIGH_MONITOR;
-using static CorProf.Bindings.COR_PRF_GC_GENERATION;
+﻿using ClrProfiling.Shared;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Com;
+using Windows.Win32.System.Diagnostics.ClrProfiling;
+using ClrProfiling.Core;
+using static Windows.Win32.System.Diagnostics.ClrProfiling.COR_PRF_MONITOR;
+using static Windows.Win32.System.Diagnostics.ClrProfiling.COR_PRF_HIGH_MONITOR;
+using static Windows.Win32.System.Diagnostics.ClrProfiling.COR_PRF_GC_GENERATION;
 
 namespace TestProfilers
 {
-    //[ProfilerCallback("55b9554d-6115-45a2-be1e-c80f7fa35369")]
+    [ProfilerCallback("55b9554d-6115-45a2-be1e-c80f7fa35369")]
     internal unsafe class GCAllocationsProfiler : TestProfilerBase
     {
         private int _gcLOHAllocations = 0;
         private int _gcPOHAllocations = 0;
         private int _failures = 0;
 
-        public override int Initialize(IUnknown* unknown)
+        public override HRESULT Initialize(IUnknown* unknown)
         {
             base.Initialize(unknown);
 
             var eventsLow = COR_PRF_ENABLE_OBJECT_ALLOCATED;
+
             var eventsHigh = COR_PRF_HIGH_BASIC_GC 
                 | COR_PRF_HIGH_MONITOR_LARGEOBJECT_ALLOCATED 
                 | COR_PRF_HIGH_MONITOR_PINNEDOBJECT_ALLOCATED;
 
-            int hr = ProfilerInfo->SetEventMask2((uint)eventsLow, (uint)eventsHigh);
+            var hr = ProfilerInfo->SetEventMask2((uint)eventsLow, (uint)eventsHigh);
 
             if (hr < 0)
             {
@@ -32,16 +34,16 @@ namespace TestProfilers
                 return hr;
             }
 
-            return HResult.S_OK;
+            return HRESULT.S_OK;
         }
 
-        public override int ObjectAllocated(ulong objectId, ulong classId)
+        public override HRESULT ObjectAllocated(nuint objectId, nuint classId)
         {
             using var _ = new ShutdownGuard();
 
             if (ShutdownGuard.HasShutdownStarted())
             {
-                return HResult.S_OK;
+                return HRESULT.S_OK;
             }
 
             COR_PRF_GC_GENERATION_RANGE gen;
@@ -67,10 +69,10 @@ namespace TestProfilers
                 Interlocked.Increment(ref _failures);
             }
 
-            return HResult.S_OK;
+            return HRESULT.S_OK;
         }
 
-        public override int Shutdown()
+        public override HRESULT Shutdown()
         {
             base.Shutdown();
 
@@ -91,7 +93,7 @@ namespace TestProfilers
 
             Console.Out.Flush();
 
-            return HResult.S_OK;
+            return HRESULT.S_OK;
         }
     }
 }

@@ -182,9 +182,14 @@ namespace Tests.Common
             process.OutputDataReceived += (sender, args) =>
             {
                 Console.WriteLine(args.Data);
-                outputHelper?.WriteLine(args.Data);
-                verifier.WriteLine(args.Data);
+                
+                if (args?.Data != null)
+                {
+                    outputHelper?.WriteLine(args.Data);
+                    verifier.WriteLine(args.Data);
+                }
             };
+
             process.Start();
 
             process.BeginOutputReadLine();

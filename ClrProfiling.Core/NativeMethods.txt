@@ -1,0 +1,13 @@
+ICorProfilerCallback9
+ICorProfilerInfo13
+IMetaDataImport
+IUnknown
+
+CorOpenFlags
+FunctionIDOrClientID
+COR_PRF_ELT_INFO
+
+COR_PRF_MONITOR
+COR_PRF_HIGH_MONITOR
+COR_PRF_GC_GENERATION
+CORPROF_E_CLASSID_IS_ARRAY

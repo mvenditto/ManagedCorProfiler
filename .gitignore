@@ -5,6 +5,7 @@
 
 *.zip
 include/
+build/
 *.exp
 *.lib
 *.dll
