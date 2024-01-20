@@ -5,9 +5,9 @@ VisualStudioVersion = 17.4.33122.133
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClrProfiling.Core", "ClrProfiling.Core\ClrProfiling.Core.csproj", "{EF302537-E1D4-4DD5-9F3F-80A52D5F8172}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleApp", "SampleApp\SampleApp.csproj", "{D8F7AE99-3F9D-44DD-B23F-5E3625EFC304}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleApp", "Samples\SampleApp\SampleApp.csproj", "{D8F7AE99-3F9D-44DD-B23F-5E3625EFC304}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyProfiler", "MyProfiler\MyProfiler.csproj", "{F14A3C6D-4F03-48CF-A3F4-BACF87DC97F2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ELT3Profiler_StaticallyLinkedHooks", "Samples\ELT3Profiler_StaticallyLinkedHooks\ELT3Profiler_StaticallyLinkedHooks.csproj", "{F14A3C6D-4F03-48CF-A3F4-BACF87DC97F2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClrProfiling.Generator", "ClrProfiling.Generator\ClrProfiling.Generator.csproj", "{A384B3AC-AC08-40DB-B6D9-BEE852B7F385}"
 EndProject
