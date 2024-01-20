@@ -3,7 +3,7 @@
 A prototype [.NET profiler](https://learn.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/) written in C# leveraging [NativeAOT](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/) + [ComWrappers](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.comwrappers?view=net-7.0).
 
 > **Warning**
-> Work in progress
+> Work in progress, samples OUTDATED atm.
 
 ```csharp
 ///
