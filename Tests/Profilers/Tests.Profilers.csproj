@@ -1,26 +1,49 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
+  
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <PropertyGroup>
     <PublishAot>true</PublishAot>
     <AssemblyName>Profiler</AssemblyName>
+	  <!-- Do not trim or find a more granular way for preventing TransitionsProfiler::DoPInvoke from being trimmed.
+	   If DoPInvoke gets trimmed, running the Transitions test causes the testrunner to silently crash.
+		 The crash is caused by a System.EntryPointNotFoundException.-->
+	  <IsTrimmable>false</IsTrimmable>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <HooksLibType>shared</HooksLibType>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(HooksLibType)' == 'static'">
+    <DirectPInvoke Include="hooks" />
+    <NativeLibrary Include="hooks.asm.obj" Condition="$(RuntimeIdentifier.StartsWith('win'))" />
+    <NativeLibrary Include="hooks.cpp.obj" Condition="$(RuntimeIdentifier.StartsWith('win'))" />
+    <LinkerArg Include="/LIBPATH:$(OutDir)/hooks-native" Condition="$(RuntimeIdentifier.StartsWith('win'))" />
+  </ItemGroup>
+ 
+  <ItemGroup>
+    <PackageReference Include="Serilog" Version="3.1.1" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
+  </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\CorProf.Generator\CorProf.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\..\CorProf.Core\CorProf.Core.csproj" />
-    <ProjectReference Include="..\..\CorProf.Helpers\CorProf.Helpers.csproj" />
+    <ProjectReference Include="..\..\ClrProfiling.Hooks\ClrProfiling.Hooks.csproj">
+      <Properties>HooksLibType=$(HooksLibType)</Properties>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ClrProfiling.Generator\ClrProfiling.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\ClrProfiling.Core\ClrProfiling.Core.csproj" />
+    <ProjectReference Include="..\..\ClrProfiling.Backend.Windows\ClrProfiling.Backend.Windows.csproj" />
     <ProjectReference Include="..\Common\Tests.Common.csproj" />
   </ItemGroup>
 
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+    <DefineConstants>OS_WINDOWS</DefineConstants>
+  </PropertyGroup>
 </Project>

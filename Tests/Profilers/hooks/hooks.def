@@ -1,8 +1,0 @@
-EXPORTS
-EnterStub
-LeaveStub
-TailcallStub
-SetUserCallbacks
-EnterNaked3WithInfo
-LeaveNaked3WithInfo
-TailcallNaked3WithInfo

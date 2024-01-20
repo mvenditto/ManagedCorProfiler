@@ -22,7 +22,7 @@ namespace Profiler.Tests
             return 100;
         }
 
-        public static int Main(string[] args)
+        public static int ExecuteTest(string[] args, IOutputHelper outputHelper = null)
         {
             if (args.Length > 0 && args[0].Equals("RunTest", StringComparison.OrdinalIgnoreCase))
             {
@@ -31,7 +31,13 @@ namespace Profiler.Tests
 
             return ProfilerTestRunner.Run(profileePath: System.Reflection.Assembly.GetExecutingAssembly().Location,
                                           testName: "GCCallbacksAllocate",
-                                          profilerClsid: GcAllocateEventsProfilerGuid);
+                                          profilerClsid: GcAllocateEventsProfilerGuid,
+                                          outputHelper: outputHelper);
+        }
+
+        public static int Main(string[] args)
+        {
+            return ExecuteTest(args);
         }
     }
 }

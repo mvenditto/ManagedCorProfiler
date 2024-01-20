@@ -1,44 +1,42 @@
-﻿using CorProf.Bindings;
-using CorProf.Core.Abstractions;
-using CorProf.Helpers;
-using CorProf.Shared;
-using System.Runtime.InteropServices;
+﻿using Windows.Win32.System.Diagnostics.ClrProfiling;
+using Windows.Win32.System.Com;
+using Windows.Win32.Foundation;
+using ClrProfiling.Core.Abstractions;
+using ClrProfiling.Shared;
 
 namespace TestProfilers
 {
-    public abstract unsafe class TestProfiler: CorProfilerCallback2
+    internal abstract unsafe class TestProfilerBase : CorProfilerCallback2
     {
-        protected ICorProfilerInfo11* _profilerInfo;
-        protected ICorProfilerInfoHelpers2 _profilerInfoHelpers;
+        protected ICorProfilerInfo13* ProfilerInfo;
+        protected ICorProfilerInfo2* ProfilerInfo2;
 
-        public override int Initialize(IUnknown* unknown)
+        public override HRESULT Initialize(IUnknown* unknown)
         {
             ShutdownGuard.Initialize();
 
             Console.WriteLine("Profiler.dll!Profiler::Initialize");
             Console.Out.Flush();
 
-            var guid_ = CorProfConsts.IID_ICorProfilerInfo5;
+            var hr = unknown->QueryInterface(ICorProfilerInfo13.IID_Guid, out var pinfo);
 
-            var hr = Marshal.QueryInterface((nint)unknown, ref guid_, out var pinfo);
-
-            if (hr < 0)
+            if (hr.Failed)
             {
                 Console.WriteLine("Profiler.dll!Profiler::Initialize failed to QI for ICorProfilerInfo.");
-                _profilerInfo = null;
+                ProfilerInfo = null;
+                ProfilerInfo2 = null;
             }
             else
             {
-                _profilerInfo = (ICorProfilerInfo11*)pinfo;
-
-                _profilerInfoHelpers = new ICorProfilerInfoHelpers2(
-                    (ICorProfilerInfo2*)pinfo);
+                ProfilerInfo = (ICorProfilerInfo13*)pinfo;
+                ProfilerInfo->AddRef();
+                ProfilerInfo2 = (ICorProfilerInfo2*)pinfo;
             }
 
-            return 0;
+            return HRESULT.S_OK;
         }
 
-        public override int Shutdown()
+        public override HRESULT Shutdown()
         {
             Console.WriteLine("Profiler.dll!Profiler::Shutdown");
             Console.Out.Flush();
@@ -46,7 +44,9 @@ namespace TestProfilers
             // Wait for any in progress profiler callbacks to finish.
             ShutdownGuard.WaitForInProgressHooks();
 
-            return 0;
+            ProfilerInfo->Release();
+
+            return HRESULT.S_OK;
         }
     }
 }

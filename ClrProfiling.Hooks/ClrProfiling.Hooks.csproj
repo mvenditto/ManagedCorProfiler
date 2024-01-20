@@ -1,0 +1,55 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="msbuild\ClrProfiling.Hooks.Props"></Import>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<Platforms>AnyCPU;x64</Platforms>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.49-beta">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\ClrProfiling.Core\ClrProfiling.Core.csproj" />
+	</ItemGroup>
+
+	<PropertyGroup>
+		<OutputDirectory>.\hooks\build\</OutputDirectory>
+    <HooksLibType>shared</HooksLibType>
+    <!-- Hooks native artifacts output directory -->
+    <HooksLibOutputDirectory>hooks-native/</HooksLibOutputDirectory>
+	</PropertyGroup>
+
+	<ItemGroup>
+    <Content Include="hooks\build\$(Configuration)\hooks.dll" Condition="'$(HooksLibType)' == 'shared'">
+      <Visible>false</Visible>
+      <TargetPath>$(HooksLibOutputDirectory)\hooks.dll</TargetPath>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+		<Content Include="hooks\build\hooks.dir\$(Configuration)\hooks.cpp.obj" Condition="'$(HooksLibType)' == 'static'">
+			<Visible>false</Visible>
+			<TargetPath>$(HooksLibOutputDirectory)\hooks.cpp.obj</TargetPath>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+    <Content Include="hooks\build\hooks.dir\$(Configuration)\hooks.asm.obj" Condition="'$(HooksLibType)' == 'static'">
+      <Visible>false</Visible>
+      <TargetPath>$(HooksLibOutputDirectory)\hooks.asm.obj</TargetPath>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+	</ItemGroup>
+
+	<!-- Build the native dll BEFORE the Content file copy is executed otherwise the build fails because the file does not exists. -->
+	<Target BeforeTargets="_CopyFilesMarkedCopyLocal;_CopySourceItemsToOutputDirectory" Name="BuildNative">
+		<Message Text="Building native library" />
+		<MakeDir Directories="$(OutputDirectory)" />
+		<Exec Command="cmake $(CMakeGenerator) -DHOOKS_LIB_TYPE=$(HooksLibType) -DHOOKS_VERSION=$(HooksVersion) -DINSTALL_DIR=../bin/$(Platform)/$(Configuration) -S ./hooks -B $(OutputDirectory)" />
+		<Exec Command="cmake --build $(OutputDirectory) --config $(Configuration) -v" />
+	</Target>
+
+</Project>

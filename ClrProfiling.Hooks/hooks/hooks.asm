@@ -1,0 +1,267 @@
+IFDEF ELT2
+    EXTERN EnterStub2:PROC
+    EXTERN LeaveStub2:PROC
+    EXTERN TailcallStub2:PROC
+ENDIF
+
+IFDEF ELT3
+    EXTERN EnterStub3WithInfo:PROC
+    EXTERN LeaveStub3WithInfo:PROC
+    EXTERN TailcallStub3WithInfo:PROC
+ENDIF
+
+_text SEGMENT PARA 'CODE'
+
+IFDEF ELT2
+ALIGN 16
+PUBLIC EnterNaked2
+
+EnterNaked2 PROC EXPORT FRAME
+
+    PUSH RAX
+    .PUSHREG RAX
+    PUSH RCX
+    .PUSHREG RCX
+    PUSH RDX
+    .PUSHREG RDX
+    PUSH R8
+    .PUSHREG R8
+    PUSH R9
+    .PUSHREG R9
+    PUSH R10
+    .PUSHREG R10
+    PUSH R11
+    .PUSHREG R11
+
+    SUB RSP, 20H
+    .ALLOCSTACK 20H
+
+    .ENDPROLOG
+
+    CALL EnterStub2
+
+    ADD RSP, 20H
+
+    POP R11
+    POP R10
+    POP R9
+    POP R8
+    POP RDX
+    POP RCX
+    POP RAX
+
+    RET
+
+EnterNaked2 ENDP
+
+ALIGN 16
+PUBLIC LeaveNaked2
+
+LeaveNaked2 PROC EXPORT FRAME
+
+    PUSH RAX
+    .PUSHREG RAX
+    PUSH RCX
+    .PUSHREG RCX
+    PUSH RDX
+    .PUSHREG RDX
+    PUSH R8
+    .PUSHREG R8
+    PUSH R9
+    .PUSHREG R9
+    PUSH R10
+    .PUSHREG R10
+    PUSH R11
+    .PUSHREG R11
+
+    SUB RSP, 20H
+    .ALLOCSTACK 20H
+
+    .ENDPROLOG
+
+    CALL LeaveStub2
+
+    ADD RSP, 20H
+
+    POP R11
+    POP R10
+    POP R9
+    POP R8
+    POP RDX
+    POP RCX
+    POP RAX
+
+    RET
+
+LeaveNaked2 ENDP
+
+ALIGN 16
+PUBLIC TailcallNaked2
+
+TailcallNaked2 PROC EXPORT FRAME
+
+    PUSH RAX
+    .PUSHREG RAX
+    PUSH RCX
+    .PUSHREG RCX
+    PUSH RDX
+    .PUSHREG RDX
+    PUSH R8
+    .PUSHREG R8
+    PUSH R9
+    .PUSHREG R9
+    PUSH R10
+    .PUSHREG R10
+    PUSH R11
+    .PUSHREG R11
+
+    SUB RSP, 20H
+    .ALLOCSTACK 20H
+
+    .ENDPROLOG
+
+    CALL TailcallStub2
+
+    ADD RSP, 20H
+
+    POP R11
+    POP R10
+    POP R9
+    POP R8
+    POP RDX
+    POP RCX
+    POP RAX
+
+    RET
+
+TailcallNaked2 ENDP
+ENDIF
+
+IFDEF ELT3
+ALIGN 16
+PUBLIC EnterNaked3WithInfo
+
+EnterNaked3WithInfo PROC EXPORT FRAME
+
+    PUSH RAX
+    .PUSHREG RAX
+    PUSH RCX
+    .PUSHREG RCX
+    PUSH RDX
+    .PUSHREG RDX
+    PUSH R8
+    .PUSHREG R8
+    PUSH R9
+    .PUSHREG R9
+    PUSH R10
+    .PUSHREG R10
+    PUSH R11
+    .PUSHREG R11
+
+    SUB RSP, 20H
+    .ALLOCSTACK 20H
+
+    .ENDPROLOG
+
+    CALL EnterStub3WithInfo
+
+    ADD RSP, 20H
+
+    POP R11
+    POP R10
+    POP R9
+    POP R8
+    POP RDX
+    POP RCX
+    POP RAX
+
+    RET
+
+EnterNaked3WithInfo ENDP
+
+ALIGN 16
+PUBLIC LeaveNaked3WithInfo
+
+LeaveNaked3WithInfo PROC EXPORT FRAME
+
+    PUSH RAX
+    .PUSHREG RAX
+    PUSH RCX
+    .PUSHREG RCX
+    PUSH RDX
+    .PUSHREG RDX
+    PUSH R8
+    .PUSHREG R8
+    PUSH R9
+    .PUSHREG R9
+    PUSH R10
+    .PUSHREG R10
+    PUSH R11
+    .PUSHREG R11
+
+    SUB RSP, 20H
+    .ALLOCSTACK 20H
+
+    .ENDPROLOG
+
+    CALL LeaveStub3WithInfo
+
+    ADD RSP, 20H
+
+    POP R11
+    POP R10
+    POP R9
+    POP R8
+    POP RDX
+    POP RCX
+    POP RAX
+
+    RET
+
+LeaveNaked3WithInfo ENDP
+
+ALIGN 16
+PUBLIC TailcallNaked3WithInfo
+
+TailcallNaked3WithInfo PROC EXPORT FRAME
+
+    PUSH RAX
+    .PUSHREG RAX
+    PUSH RCX
+    .PUSHREG RCX
+    PUSH RDX
+    .PUSHREG RDX
+    PUSH R8
+    .PUSHREG R8
+    PUSH R9
+    .PUSHREG R9
+    PUSH R10
+    .PUSHREG R10
+    PUSH R11
+    .PUSHREG R11
+
+    SUB RSP, 20H
+    .ALLOCSTACK 20H
+
+    .ENDPROLOG
+
+    CALL TailcallStub3WithInfo
+
+    ADD RSP, 20H
+
+    POP R11
+    POP R10
+    POP R9
+    POP R8
+    POP RDX
+    POP RCX
+    POP RAX
+
+    RET
+
+TailcallNaked3WithInfo ENDP
+ENDIF
+
+_text ENDS
+
+END

@@ -16,7 +16,7 @@ namespace Tests.Common
         NoStartupAttach,
         ReverseDiagnosticsMode
     }
-    
+
     public interface IOutputHelper
     {
         void WriteLine(string message);
@@ -47,8 +47,9 @@ namespace Tests.Common
             Console.WriteLine(currDir);
 
             string profilerPath = Path.Combine(
-                Path.GetFullPath(@"..\..\..\..\Profilers\bin\profiler\"),
+                Path.GetFullPath(@"..\..\..\..\..\Profilers\bin\profiler\"),
                 profilerName);
+
             return profilerPath;
         }
 
@@ -97,7 +98,7 @@ namespace Tests.Common
             arguments = profileePath + " RunTest " + profileeArguments;
             program = GetCorerunPath();
             string profilerPath = GetProfilerPath();
-            
+        
             if (!Path.Exists(profilerPath))
             {
                 throw new ArgumentException("Cannot locate profiler dll.");
@@ -182,9 +183,14 @@ namespace Tests.Common
             process.OutputDataReceived += (sender, args) =>
             {
                 Console.WriteLine(args.Data);
-                outputHelper?.WriteLine(args.Data);
-                verifier.WriteLine(args.Data);
+                
+                if (args?.Data != null)
+                {
+                    outputHelper?.WriteLine(args.Data);
+                    verifier.WriteLine(args.Data);
+                }
             };
+
             process.Start();
 
             process.BeginOutputReadLine();

@@ -4,6 +4,7 @@
 using System;
 using System.Threading;
 using Tests.Common;
+using Xunit.Abstractions;
 
 namespace Profiler.Tests
 {
@@ -71,7 +72,7 @@ namespace Profiler.Tests
             return 100;
         }
 
-        public static int Main(string[] args)
+        public static int ExecuteTest(string[] args, IOutputHelper outputHelper = null)
         {
             if (args.Length > 0 && args[0].Equals("RunTest", StringComparison.OrdinalIgnoreCase))
             {
@@ -80,7 +81,13 @@ namespace Profiler.Tests
 
             return ProfilerTestRunner.Run(profileePath: System.Reflection.Assembly.GetExecutingAssembly().Location,
                                           testName: "GCTests",
-                                          profilerClsid: GCProfilerGuid);
+                                          profilerClsid: GCProfilerGuid,
+                                          outputHelper: outputHelper);
+        }
+
+        public static int Main(string[] args)
+        {
+            return ExecuteTest(args);
         }
     }
 }

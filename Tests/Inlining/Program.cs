@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -10,7 +11,7 @@ using Tests.Common;
 
 namespace Profiler.Tests
 {
-    class InliningTest
+    public class InliningTest
     {
         private static readonly Guid InliningGuid = new Guid("DDADC0CB-21C8-4E53-9A6C-7C65EE5800CE");
 
@@ -51,7 +52,7 @@ namespace Profiler.Tests
             return 100;
         }
 
-        public static int Main(string[] args)
+        public static int ExecuteTest(string[] args, IOutputHelper outputHelper = null)
         {
             if (args.Length > 0 && args[0].Equals("RunTest", StringComparison.OrdinalIgnoreCase))
             {
@@ -61,7 +62,14 @@ namespace Profiler.Tests
             return ProfilerTestRunner.Run(profileePath: System.Reflection.Assembly.GetExecutingAssembly().Location,
                                           testName: "UnitTestInlining",
                                           profilerClsid: InliningGuid,
-                                          profileeOptions: ProfileeOptions.OptimizationSensitive);
+                                          profileeOptions: ProfileeOptions.OptimizationSensitive,
+                                          outputHelper: outputHelper);
+        }
+
+
+        public static int Main(string[] args)
+        {
+            return ExecuteTest(args);
         }
     }
 }

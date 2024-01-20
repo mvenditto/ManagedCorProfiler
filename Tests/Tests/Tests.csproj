@@ -1,11 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
     <IsPackable>false</IsPackable>
+
+    <Platforms>AnyCPU;x64</Platforms>
+
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,10 +26,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Assembly\Assembly.csproj" />
     <ProjectReference Include="..\GCAllocations\GCAllocations.csproj" />
     <ProjectReference Include="..\GCBasic\GCBasic.csproj" />
     <ProjectReference Include="..\GC\GC.csproj" />
-    <ProjectReference Include="..\Transitions\Transitions.csproj" />
+    <ProjectReference Include="..\Handles\Handles.csproj" />
+    <ProjectReference Include="..\Inlining\Inlining.csproj" />
+	  <ProjectReference Include="..\Transitions\Transitions.csproj">
+		  
+	  </ProjectReference>
   </ItemGroup>
-
 </Project>

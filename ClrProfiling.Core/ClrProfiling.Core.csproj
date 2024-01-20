@@ -1,0 +1,54 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Platforms>x86;x64</Platforms>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Title>CorProf.Core</Title>
+    <VersionPrefix>0.0.1</VersionPrefix>
+    <VersionSuffix></VersionSuffix>
+    <Authors>mvenditto</Authors>
+    <Company>mvenditto</Company>
+    <Description>Interfaces and COM Wrappers to implement an ICorProfilerCallback(X) in managed code (C#)</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl></PackageProjectUrl>
+    <RepositoryUrl>https://github.com/mvenditto/ManagedCorProfiler</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>net;clr;profiler;cor;icorprofilercallback;csharp</PackageTags>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="NativeMethods.json" />
+    <None Remove="NativeMethods.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="NativeMethods.json" />
+    <AdditionalFiles Include="NativeMethods.txt" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Diagnostics.Runtime" Version="2.2.343001" />
+	<PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.49-beta">
+		<PrivateAssets>all</PrivateAssets>
+	</PackageReference>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <PublishAot>true</PublishAot>
+  </PropertyGroup>
+
+  <!-- https://github.com/dotnet/runtimelab/issues/976
+    <ItemGroup>
+      <DirectPInvoke Include="kernel32" />
+    </ItemGroup>
+  -->
+
+</Project>

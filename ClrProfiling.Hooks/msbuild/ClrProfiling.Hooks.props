@@ -1,0 +1,8 @@
+<Project>
+   <PropertyGroup>
+       <!-- EnterLeaveTail hooks type: ELT|ELT2|ELT3|ALL-->
+       <HooksVersion>ELT3</HooksVersion>
+       <!-- Hooks library type: shared|static -->
+       <HooksLibType>static</HooksLibType>
+   </PropertyGroup>
+</Project>

@@ -1,7 +1,0 @@
-EXPORTS
-EnterStub
-LeaveStub
-TailcallStub
-EnterNaked2
-LeaveNaked2
-TailcallNaked2
