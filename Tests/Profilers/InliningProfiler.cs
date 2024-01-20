@@ -142,9 +142,15 @@ namespace TestProfilers
                 return hr;
             }
 
-            var hooksLibPath = Path.GetFullPath(@"..\..\..\..\..\Profilers\bin\profiler\hooks.dll");
+            var profilerDllFilePath = Environment.GetEnvironmentVariable("CORECLR_PROFILER_PATH");
 
-            Console.WriteLine(hooksLibPath);
+            Console.WriteLine($"CORECLR_PROFILER_PATH: {profilerDllFilePath}");
+
+            var profilerDirectory = Path.GetDirectoryName(profilerDllFilePath);
+
+            var hooksLibPath = Path.Combine(profilerDirectory!, "hooks-native", "hooks.dll");
+
+            Console.WriteLine($"hooks native lib path: {hooksLibPath}");
 
             hr = EnterLeaveFunctionHooks3WithInfo.Initialize(hooksLibPath);
 

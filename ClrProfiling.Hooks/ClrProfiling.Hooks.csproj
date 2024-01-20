@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
+  <Import Project="msbuild\ClrProfiling.Hooks.Props"></Import>
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
@@ -21,22 +21,35 @@
 
 	<PropertyGroup>
 		<OutputDirectory>.\hooks\build\</OutputDirectory>
+    <HooksLibType>shared</HooksLibType>
+    <!-- Hooks native artifacts output directory -->
+    <HooksLibOutputDirectory>hooks-native/</HooksLibOutputDirectory>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Content Include="hooks\build\$(Configuration)\hooks.dll">
+    <Content Include="hooks\build\$(Configuration)\hooks.dll" Condition="'$(HooksLibType)' == 'shared'">
+      <Visible>false</Visible>
+      <TargetPath>$(HooksLibOutputDirectory)\hooks.dll</TargetPath>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+		<Content Include="hooks\build\hooks.dir\$(Configuration)\hooks.cpp.obj" Condition="'$(HooksLibType)' == 'static'">
 			<Visible>false</Visible>
-			<TargetPath>hooks.dll</TargetPath>
+			<TargetPath>$(HooksLibOutputDirectory)\hooks.cpp.obj</TargetPath>
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
+    <Content Include="hooks\build\hooks.dir\$(Configuration)\hooks.asm.obj" Condition="'$(HooksLibType)' == 'static'">
+      <Visible>false</Visible>
+      <TargetPath>$(HooksLibOutputDirectory)\hooks.asm.obj</TargetPath>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
 	</ItemGroup>
 
 	<!-- Build the native dll BEFORE the Content file copy is executed otherwise the build fails because the file does not exists. -->
 	<Target BeforeTargets="_CopyFilesMarkedCopyLocal;_CopySourceItemsToOutputDirectory" Name="BuildNative">
 		<Message Text="Building native library" />
 		<MakeDir Directories="$(OutputDirectory)" />
-		<Exec Command="cmake $(CMakeGenerator) -DINSTALL_DIR=../bin/$(Platform)/$(Configuration) -S ./hooks -B $(OutputDirectory)" />
-		<Exec Command="cmake --build $(OutputDirectory) --config $(Configuration)" />
+		<Exec Command="cmake $(CMakeGenerator) -DHOOKS_LIB_TYPE=$(HooksLibType) -DHOOKS_VERSION=$(HooksVersion) -DINSTALL_DIR=../bin/$(Platform)/$(Configuration) -S ./hooks -B $(OutputDirectory)" />
+		<Exec Command="cmake --build $(OutputDirectory) --config $(Configuration) -v" />
 	</Target>
 
 </Project>

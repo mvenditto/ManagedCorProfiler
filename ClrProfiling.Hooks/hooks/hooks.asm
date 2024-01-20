@@ -1,16 +1,22 @@
-EXTERN EnterStub2:PROC
-EXTERN LeaveStub2:PROC
-EXTERN TailcallStub2:PROC
-EXTERN EnterStub3WithInfo:PROC
-EXTERN LeaveStub3WithInfo:PROC
-EXTERN TailcallStub3WithInfo:PROC
+IFDEF ELT2
+    EXTERN EnterStub2:PROC
+    EXTERN LeaveStub2:PROC
+    EXTERN TailcallStub2:PROC
+ENDIF
+
+IFDEF ELT3
+    EXTERN EnterStub3WithInfo:PROC
+    EXTERN LeaveStub3WithInfo:PROC
+    EXTERN TailcallStub3WithInfo:PROC
+ENDIF
 
 _text SEGMENT PARA 'CODE'
 
+IFDEF ELT2
 ALIGN 16
 PUBLIC EnterNaked2
 
-EnterNaked2 PROC FRAME
+EnterNaked2 PROC EXPORT FRAME
 
     PUSH RAX
     .PUSHREG RAX
@@ -51,7 +57,7 @@ EnterNaked2 ENDP
 ALIGN 16
 PUBLIC LeaveNaked2
 
-LeaveNaked2 PROC FRAME
+LeaveNaked2 PROC EXPORT FRAME
 
     PUSH RAX
     .PUSHREG RAX
@@ -92,7 +98,7 @@ LeaveNaked2 ENDP
 ALIGN 16
 PUBLIC TailcallNaked2
 
-TailcallNaked2 PROC FRAME
+TailcallNaked2 PROC EXPORT FRAME
 
     PUSH RAX
     .PUSHREG RAX
@@ -129,11 +135,13 @@ TailcallNaked2 PROC FRAME
     RET
 
 TailcallNaked2 ENDP
+ENDIF
 
+IFDEF ELT3
 ALIGN 16
 PUBLIC EnterNaked3WithInfo
 
-EnterNaked3WithInfo PROC FRAME
+EnterNaked3WithInfo PROC EXPORT FRAME
 
     PUSH RAX
     .PUSHREG RAX
@@ -174,7 +182,7 @@ EnterNaked3WithInfo ENDP
 ALIGN 16
 PUBLIC LeaveNaked3WithInfo
 
-LeaveNaked3WithInfo PROC FRAME
+LeaveNaked3WithInfo PROC EXPORT FRAME
 
     PUSH RAX
     .PUSHREG RAX
@@ -215,7 +223,7 @@ LeaveNaked3WithInfo ENDP
 ALIGN 16
 PUBLIC TailcallNaked3WithInfo
 
-TailcallNaked3WithInfo PROC FRAME
+TailcallNaked3WithInfo PROC EXPORT FRAME
 
     PUSH RAX
     .PUSHREG RAX
@@ -252,6 +260,7 @@ TailcallNaked3WithInfo PROC FRAME
     RET
 
 TailcallNaked3WithInfo ENDP
+ENDIF
 
 _text ENDS
 

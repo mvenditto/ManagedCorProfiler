@@ -49,6 +49,7 @@ namespace Tests.Common
             string profilerPath = Path.Combine(
                 Path.GetFullPath(@"..\..\..\..\..\Profilers\bin\profiler\"),
                 profilerName);
+
             return profilerPath;
         }
 

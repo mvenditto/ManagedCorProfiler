@@ -12,5 +12,8 @@ namespace ClrProfiling.Hooks
 
         [DllImport("kernel32.dll")]
         public static extern bool FreeLibrary(IntPtr hModule);
+
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr GetModuleHandle(IntPtr moduleName);
     }
 }

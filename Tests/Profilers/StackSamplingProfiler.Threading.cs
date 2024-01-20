@@ -1,8 +1,6 @@
 ﻿using ClrProfiling.Core;
 using ClrProfiling.Backend.Extensions;
 using ClrProfiling.Backend.Threading;
-using Serilog;
-using Serilog.Extensions.Logging;
 using Microsoft.Extensions.Logging;
 using ClrProfiling.Helpers;
 using System.Buffers;
@@ -11,6 +9,8 @@ using Windows.Win32.System.Com;
 using Windows.Win32.System.Diagnostics.ClrProfiling;
 
 using ClrProfiling.Backend.Windows;
+using Serilog;
+using Serilog.Extensions.Logging;
 
 namespace TestProfilers;
 
