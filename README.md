@@ -109,7 +109,7 @@ C:\ManagedCorProfiler\Samples\ModuleLoads> █</samp></pre>
 
 <picture>
 <source
-  srcset="/docs/images/compilation-darrk.svg"
+  srcset="/docs/images/compilation-dark.svg"
   media="(prefers-color-scheme: dark)"
 />
 <source
