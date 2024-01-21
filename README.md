@@ -1,147 +1,146 @@
 # ManagedCorProfiler
 
-A prototype [.NET profiler](https://learn.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/) written in C# leveraging [NativeAOT](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/) + [ComWrappers](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.comwrappers?view=net-7.0).
+A prototype CLR profiler written in C# for learning and fun.
 
-> [!IMPORTANT]  
-> README OUTDATED atm.
+> [!WARNING]
+> 🚧 WIP WIP WIP 🚧
 
+## Building blocks
+- [NativeAOT](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/) native compilation to build and link the native profiler library.
+- [ComWrappers API](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.comwrappers?view=net-7.0) to expose the `ICorProfilerCallbackX` to the CLR.
+- [CsWin32](https://github.com/microsoft/CsWin32) to generate C# bindings for the native [Profiling API](https://learn.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/).
+
+## Exposing a profiler callback
 ```csharp
 ///
 /// A sample profiler callback that prints the loaded modules
 ///
-[ProfilerCallback("090B7720-6605-462B-86A0-C4D4C444D3F5")]
-internal unsafe class MyProfiler : ICorProfilerCallback2
+[ProfilerCallback("cf0d821e-299b-5307-a3d8-b283c03916dd")]
+internal unsafe class MyProfiler : CorProfilerCallback2
 {
-    private ICorProfilerInfo4* _profilerInfo;
-    
-    int ICorProfilerCallback.Initialize(CorProf.Bindings.IUnknown* unknown)
+    private ICorProfilerInfo2* _corProfilerInfo;
+
+    private const uint NameBufferLength = 256;
+
+    public override HRESULT Initialize(IUnknown* pICorProfilerInfoUnk)
     {
-        var guid_ = CorProfConsts.IID_ICorProfilerInfo4;
+        // Query for a pointer to the ICorProfilerCallback2 interface
+        var hr = pICorProfilerInfoUnk->QueryInterface(ICorProfilerInfo2.IID_Guid, out var pinfo);
 
-        var hr = Marshal.QueryInterface((nint)unknown, ref guid_, out var pinfo);
-
-        if (hr < 0)
+        if (hr.Failed)
         {
-            return HResult.E_FAIL;
+            Console.WriteLine($"FAIL QueryInterface hr={hr}");
+            return HRESULT.E_FAIL;
         }
 
-        var eventMask = COR_PRF_MONITOR.COR_PRF_MONITOR_MODULE_LOADS;
+        // Track our reference
+        _corProfilerInfo = (ICorProfilerInfo2*)pinfo;
+        _corProfilerInfo->AddRef();
 
-        _profilerInfo = (ICorProfilerInfo4*)pinfo;
+        // Specify our profiler is interested in module load events (Module* callbacks)
+        hr = _corProfilerInfo->SetEventMask((uint)COR_PRF_MONITOR_MODULE_LOADS);
 
-        hr = _profilerInfo->SetEventMask((uint)eventMask);
+        if (hr.Failed)
+        {
+            Console.WriteLine($"FAIL SetEventMask hr={hr}");
+            return HRESULT.E_FAIL;
+        }
+
+        return HRESULT.S_OK;
+    }
+
+    public override HRESULT ModuleLoadFinished(nuint moduleId, HRESULT hrStatus)
+    {
+        if (hrStatus.Failed)
+        {
+            return HRESULT.S_OK;
+        }
+
+        // Allocate a buffer to hold the module name
+        using var nameBuff = NativeBuffer<ushort>.Alloc(NameBufferLength);
+        var szName = new PWSTR((char*)nameBuff.Pointer);
         
-        if (hr < 0)
-        {
-            return HResult.E_FAIL;
-        }
-    }
-    
-    int ICorProfilerCallback.ModuleLoadFinished(ulong moduleId, int hrStatus)
-    {
-        var pbBaseLoadAddr = (byte*)null;
         uint pcchName = 0;
-        ulong assemblyId = 0;
-        var szName = (ushort*)NativeMemory.Alloc(sizeof(ushort) * 300);
 
-        var hr = _profilerInfo->GetModuleInfo(
-            moduleId,
-            &pbBaseLoadAddr,
-            300,
-            &pcchName,
-            szName,
-            &assemblyId);
+        // Retrieve the file name of the module
+        var hr = _corProfilerInfo->GetModuleInfo(
+            moduleId,         // the moduleId
+            null,
+            NameBufferLength, // The length, in characters, of the szName return buffer
+            &pcchName,        // A pointer to the total character length of the module's file name that is returned
+            szName,           // A caller-provided wide character buffer
+            null);
 
-        if (hr < 0)
+        if (hr.Failed)
         {
-            return HResult.E_FAIL;
+            Console.WriteLine($"FAIL GetModuleInfo hr={hr}");
+            return hr;
         }
 
-        var module = Marshal.PtrToStringUni((nint)szName);
+        var moduleName = szName.ToString();
 
-        Console.WriteLine($"Loaded Moudle -> '{module}'");
+        Console.WriteLine($"loaded module 0x{moduleId:x8} <{moduleName}>");
 
-        NativeMemory.Free(szName);
-
-        return HResult.S_OK;
+        return HRESULT.S_OK;
     }
-    
-    int ICorProfilerCallback.Shutdown() 
+
+    public override HRESULT Shutdown()
     {
-        return HResult.S_OK; 
+        _corProfilerInfo->Release();
+        return HRESULT.S_OK;
     }
 }
 ```
 
-## Overview
-<img src="/docs/images/overview.png"></img>
-
-## Sample
-<details>
-  <summary>Sample</summary>
-The sample produces a native DLL that can be loaded as a CLR Profiler.
-
-To test the concept, the example does a few basic things:
- 1. Exposes `DllGetClassObject` DLL entry point
- 2. Implements `ICorProfilerCallback` + `ICorProfilerCallback2` interfaces
- 3. hooks to `ICorProfilerCallback::ModuleLoadFinished` and `ICorProfilerInfo2::SetEnterLeaveFunctionHooks2`
- 4. logs the name of every loaded module
-
-## Sample output
-<pre><samp>C:\ManagedCorProfiler\ManagedCorProfiler> <kbd>.\run.cmd</kbd>
-DllMain(reason=DLL_PROCESS_ATTACH)
-DllGetClassObject(reason=DLL_THREAD_ATTACH)
-        RCLSID = cf0d821e-299b-5307-a3d8-b283c03916dd
-        RIID   = 00000001-0000-0000-c000-000000000046
-MyProfiler!Initialize:::ICorProfilerCallback!Initialize()
-Loaded Moudle -> 'C:\Users\user\..\runtime\artifacts\bin\coreclr\windows.x64.Debug\System.Private.CoreLib.dll'
-Loaded Moudle -> 'C:\Users\user\..\SampleApp\bin\Debug\net7.0\SampleApp.dll'
-Loaded Moudle -> 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\7.0.0\system.runtime.dll'
-Loaded Moudle -> 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\7.0.0\system.console.dll'
-Loaded Moudle -> 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\7.0.0\system.threading.dll'
-Loaded Moudle -> 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\7.0.0\system.text.encoding.extensions.dll'
-Loaded Moudle -> 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\7.0.0\system.runtime.interopservices.dll'
+### Sample output
+<pre><samp>C:\ManagedCorProfiler\Samples\ModuleLoads> <kbd>.\run.cmd</kbd>
 [... OMITTED ...]
-=> GetPinnableReference()
-=> get_Length()
-=> WriteFile()
-=> SetLastSystemError()
+Loaded Module -> 0x7ffeac1b4000 C:\Users\dev\Source\Repos\runtime\artifacts\bin\coreclr\windows.x64.Debug\System.Private.CoreLib.dll
+Loaded Module -> 0x7ffeac702148 C:\ManagedCorProfiler\Samples\SampleApp\bin\Debug\net8.0\SampleApp.dll
+Loaded Module -> 0x7ffeac703e40 C:\Program Files\dotnet\shared\Microsoft.NETCore.App\8.0.0\system.runtime.dll
+Loaded Module -> 0x7ffeac8f9798 C:\Program Files\dotnet\shared\Microsoft.NETCore.App\8.0.0\system.console.dll
+Loaded Module -> 0x7ffeac8fc1f0 C:\Program Files\dotnet\shared\Microsoft.NETCore.App\8.0.0\system.threading.dll
+Loaded Module -> 0x7ffeac9317d0 C:\Program Files\dotnet\shared\Microsoft.NETCore.App\8.0.0\system.text.encoding.extensions.dll
+Loaded Module -> 0x7ffeac9389a0 C:\Program Files\dotnet\shared\Microsoft.NETCore.App\8.0.0\system.runtime.interopservices.dll
 Hello World!
-=> GetLastSystemError()
-=> Flush()
-=> Flush()
-Hello World!
-=> OnProcessExit()
-[... OMITTED ...]
-C:\ManagedCorProfiler\ManagedCorProfiler> █</samp></pre>
-> output is actually interleaved, formatted and trimmed for clarity
-> 
-## Other approaches or variations
-> not tested, just off the top of my head
-- [DNNE](https://github.com/AaronRobinsonMSFT/DNNE) + managed assembly implementing the profiler itself
-- A native (C++) library using `nethost` to host an instance of the CRL + a managed library implementing the profiler
-- do not use `ComWrappers` but directly mess with `UnmanagedCallersOnly`, [function pointers](https://learn.microsoft.com/it-it/dotnet/csharp/language-reference/proposals/csharp-9.0/function-pointers) and co to manually implement COM ABI vtables.
+C:\ManagedCorProfiler\Samples\ModuleLoads> █</samp></pre>
+
+## Compilation
+
+<picture>
+<source
+  srcset="/docs/images/compilation-darrk.svg"
+  media="(prefers-color-scheme: dark)"
+/>
+<source
+  srcset="/docs/images/compilation-light.svg"
+  media="(prefers-color-scheme: light), (prefers-color-scheme: no-preference)"
+/>
+<img src="/docs/images/compilation-light.svg" width="800">
+</picture>
 
 ## Dumpbin of the profiler DLL
-<pre><samp>C:\ManagedCorProfiler\ManagedCorProfiler> <kbd>dumpbin.exe /EXPORTS bin\Debug\net7.0\win-x64\native\ManagedCorProfiler.dll</kbd>
+<pre><samp>C:\ManagedCorProfiler\Samples\ModuleLoads> <kbd>dumpbin.exe /EXPORTS bin\Release\net8.0\publish\win-x64\ModuleLoads.dll</kbd>
 [...OMITTED FOR BREVITY...]
     ordinal hint RVA      name
           1    0 00232660 DllCanUnloadNow = DllCanUnloadNow
           2    1 002323A0 DllGetClassObject = DllGetClassObject
           3    2 002326A0 DllMain = DllMain
-          4    3 00497430 DotNetRuntimeDebugHeader = DotNetRuntimeDebugHeader
 [...OMITTED FOR BREVITY...]
-C:\ManagedCorProfiler\ManagedCorProfiler> █</samp></pre>
-</details>
+C:\ManagedCorProfiler\Samples\ModuleLoads> █</samp></pre>
+
+## ELT Hooks
+.
+
+## How to Build
+.
+### Requirements
+.
 
 ## Contributing
 Any contribution is welcome.
 I'm actually working on porting the tests at [dotnet/runtime/tree/main/src/tests/profiler](https://github.com/dotnet/runtime/tree/main/src/tests/profiler),
 this is a good place to start contributing.
-
-## Codegen
-- code contained in the `*.Bindings` projects is generated using [ClangSharpPInvokeGenerator](https://github.com/dotnet/ClangSharp)
-- at this point, some manual tweaks are needed to make the generated bindings for an header compile (e.g fixing callconvs)
 
 ## Resources
 ### Misc
