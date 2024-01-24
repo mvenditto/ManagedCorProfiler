@@ -15,7 +15,7 @@ A prototype CLR profiler written in C# for learning and fun.
 ///
 /// A sample profiler callback that prints the loaded modules
 ///
-[ProfilerCallback("cf0d821e-299b-5307-a3d8-b283c03916dd")]
+[ProfilerCallback("1E040027-162F-489B-B12F-F113E6AF40CF")]
 internal unsafe class MyProfiler : CorProfilerCallback2
 {
     private ICorProfilerInfo2* _corProfilerInfo;
@@ -93,7 +93,7 @@ internal unsafe class MyProfiler : CorProfilerCallback2
 ```
 
 ### Sample output
-<pre><samp>C:\ManagedCorProfiler\Samples\ModuleLoads> <kbd>.\run.cmd</kbd>
+<pre><samp>C:\ManagedCorProfiler\Samples\ModuleLoadsProfiler> <kbd>.\run.cmd</kbd>
 [... OMITTED ...]
 Loaded Module -> 0x7ffeac1b4000 C:\Users\dev\Source\Repos\runtime\artifacts\bin\coreclr\windows.x64.Debug\System.Private.CoreLib.dll
 Loaded Module -> 0x7ffeac702148 C:\ManagedCorProfiler\Samples\SampleApp\bin\Debug\net8.0\SampleApp.dll
@@ -103,7 +103,7 @@ Loaded Module -> 0x7ffeac8fc1f0 C:\Program Files\dotnet\shared\Microsoft.NETCore
 Loaded Module -> 0x7ffeac9317d0 C:\Program Files\dotnet\shared\Microsoft.NETCore.App\8.0.0\system.text.encoding.extensions.dll
 Loaded Module -> 0x7ffeac9389a0 C:\Program Files\dotnet\shared\Microsoft.NETCore.App\8.0.0\system.runtime.interopservices.dll
 Hello World!
-C:\ManagedCorProfiler\Samples\ModuleLoads> █</samp></pre>
+C:\ManagedCorProfiler\Samples\ModuleLoadsProfiler> █</samp></pre>
 
 ## Compilation
 
@@ -120,14 +120,14 @@ C:\ManagedCorProfiler\Samples\ModuleLoads> █</samp></pre>
 </picture>
 
 ## Dumpbin of the profiler DLL
-<pre><samp>C:\ManagedCorProfiler\Samples\ModuleLoads> <kbd>dumpbin.exe /EXPORTS bin\Release\net8.0\publish\win-x64\ModuleLoads.dll</kbd>
+<pre><samp>C:\ManagedCorProfiler\Samples\ModuleLoadsProfiler> <kbd>dumpbin.exe /EXPORTS bin\Release\net8.0\publish\win-x64\ModuleLoadsProfiler.dll</kbd>
 [...OMITTED FOR BREVITY...]
     ordinal hint RVA      name
           1    0 00232660 DllCanUnloadNow = DllCanUnloadNow
           2    1 002323A0 DllGetClassObject = DllGetClassObject
           3    2 002326A0 DllMain = DllMain
 [...OMITTED FOR BREVITY...]
-C:\ManagedCorProfiler\Samples\ModuleLoads> █</samp></pre>
+C:\ManagedCorProfiler\Samples\ModuleLoadsProfiler> █</samp></pre>
 
 ## ELT Hooks
 .
