@@ -1,0 +1,49 @@
+version: 2.1
+orbs:
+  win: circleci/windows@5.0
+
+jobs:
+  build-windows-x64:
+    executor:
+      name: win/default
+      size: large
+      shell: powershell.exe -ExecutionPolicy Bypass
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - nuget-packages-win
+      - attach_workspace:
+          at: C:\Users\circleci\workspace
+      - run:
+          name: Install project dependencies
+          command: |
+            choco install -y cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+            dotnet restore .\ManagedCorProfiler\Tests\Profilers -r win-x64
+      - save_cache:
+          paths:
+            - C:\Users\circleci\.nuget\packages
+          key: nuget-packages-win
+      - run:
+          name: Build project
+          command: |
+            dotnet publish /p:NativeLib=Shared /p:Platform="x64" --self-contained -f net8.0 -r win-x64 -c Release -o .\ManagedCorProfiler\Tests\Profilers\bin\profiler\ .\ManagedCorProfiler\Tests\Profilers
+      - run:
+          name: Run tests
+          command: |
+            cd ManagedCorProfiler/Tests
+            dotnet test .\ManagedCorProfiler\Tests\Tests -f net8.0 -r win-x64 -c Release --filter "SKIP_ON_CI!=True" --logger "trx"
+      - run:
+          name: Test results
+          command: |
+              cd ManagedCorProfiler/Tests
+              dotnet tool install -g trx2junit
+              $Env:Path += ";$Env:USERPROFILE\.dotnet\tools"
+              trx2junit TestResults/*.trx
+      - store_test_results:
+          path: ManagedCorProfiler/Tests/TestResults
+
+workflows:
+  build-profiler:
+    jobs:
+      - build-windows-x64
