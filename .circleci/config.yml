@@ -24,11 +24,13 @@ jobs:
       - save_cache:
           paths:
             - C:\Users\circleci\.nuget\packages
+            - C:\ProgramData\chocolatey
+            - C:\Program Files\CMake
           key: nuget-packages-win
       - run:
           name: Build project
           command: |
-            dotnet publish /p:NativeLib=Shared /p:Platform="x64" --self-contained -f net8.0 -r win-x64 -c Release -o .\Tests\Profilers\bin\profiler\ .\ManagedCorProfiler\Tests\Profilers
+            dotnet publish /p:NativeLib=Shared /p:Platform="x64" --self-contained -f net8.0 -r win-x64 -c Release -o .\Tests\Profilers\bin\profiler\ .\Tests\Profilers
       - run:
           name: Run tests
           command: |
