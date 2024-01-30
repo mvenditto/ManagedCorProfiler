@@ -19,6 +19,7 @@ jobs:
           name: Install project dependencies
           command: |
             choco install -y cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+            choco install dotnet-sdk --version 8.0.101 -y
             dotnet restore .\Tests\Profilers -r win-x64
       - save_cache:
           paths:
