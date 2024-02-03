@@ -21,9 +21,8 @@
 
 	<PropertyGroup>
 		<OutputDirectory>.\hooks\build\</OutputDirectory>
-    <HooksLibType>shared</HooksLibType>
-    <!-- Hooks native artifacts output directory -->
-    <HooksLibOutputDirectory>hooks-native/</HooksLibOutputDirectory>
+		<!-- Hooks native artifacts output directory -->
+		<HooksLibOutputDirectory>hooks-native/</HooksLibOutputDirectory>
 	</PropertyGroup>
 
 	<ItemGroup>
