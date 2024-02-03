@@ -1,11 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFrameworks>net5.0;net6.0;net7.0;net8.0</TargetFrameworks>
+		<LangVersion>latest</LangVersion>
 		<OutputType>exe</OutputType>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<ImplicitUsings>enable</ImplicitUsings>
 		<Optimize>true</Optimize>
 		<Platforms>AnyCPU;x64</Platforms>
+		<ImplicitUsings>disable</ImplicitUsings>
 	</PropertyGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Common\Tests.Common.csproj" />

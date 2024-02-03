@@ -6,6 +6,7 @@ using ClrProfiling.Core;
 using static Windows.Win32.System.Diagnostics.ClrProfiling.COR_PRF_MONITOR;
 using static Windows.Win32.System.Diagnostics.ClrProfiling.COR_PRF_HIGH_MONITOR;
 using static Windows.Win32.System.Diagnostics.ClrProfiling.COR_PRF_GC_GENERATION;
+using Tests.Common.Utils;
 
 namespace TestProfilers
 {
@@ -20,6 +21,12 @@ namespace TestProfilers
         {
             base.Initialize(unknown);
 
+            if (Runtime.IsNet6OrGreater() == false)
+            {
+                Console.WriteLine("PROFILER TEST SKIPPED: ObjectAllocated callback for pinned object heap allocation only supported by runtime 6 or above. see: https://github.com/dotnet/runtime/pull/55448.");
+                return HRESULT.E_FAIL;
+            }
+
             var eventsLow = COR_PRF_ENABLE_OBJECT_ALLOCATED;
 
             var eventsHigh = COR_PRF_HIGH_BASIC_GC 
@@ -28,7 +35,7 @@ namespace TestProfilers
 
             var hr = ProfilerInfo->SetEventMask2((uint)eventsLow, (uint)eventsHigh);
 
-            if (hr < 0)
+            if (hr.Failed)
             {
                 Console.WriteLine($"SetEventMask2 failed with hr=0x{hr:x8}");
                 return hr;
@@ -43,14 +50,15 @@ namespace TestProfilers
 
             if (ShutdownGuard.HasShutdownStarted())
             {
+                Console.WriteLine("Shutdown guard: shutdown started.");
                 return HRESULT.S_OK;
             }
 
             COR_PRF_GC_GENERATION_RANGE gen;
 
-            int hr = ProfilerInfo->GetObjectGeneration(objectId, &gen);
+            var hr = ProfilerInfo->GetObjectGeneration(objectId, &gen);
 
-            if (hr < 0)
+            if (hr.Failed)
             {
                 Console.WriteLine($"GetObjectGeneration failed hr=0x{hr:x8}");
                 Interlocked.Increment(ref _failures);
@@ -58,10 +66,12 @@ namespace TestProfilers
             else if (gen.generation == COR_PRF_GC_LARGE_OBJECT_HEAP)
             {
                 Interlocked.Increment(ref _gcLOHAllocations);
+                Console.WriteLine($"0x{objectId:x8} -> LARGE_OBJECT_HEAP");
             }
             else if (gen.generation == COR_PRF_GC_PINNED_OBJECT_HEAP)
             {
                 Interlocked.Increment(ref _gcPOHAllocations);
+                Console.WriteLine($"0x{objectId:x8} -> PINNED_OBJECT_HEAP");
             }
             else
             {

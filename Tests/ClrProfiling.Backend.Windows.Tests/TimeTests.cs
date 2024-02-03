@@ -2,8 +2,6 @@ using Xunit;
 using System.Runtime.InteropServices.ComTypes;
 using Windows.Win32;
 using Windows.Win32.Foundation;
-using Microsoft.Extensions.Logging.Abstractions;
-using ClrProfiling.Backend.Threading;
 
 namespace ClrProfiling.Backend.Windows.Tests;
 

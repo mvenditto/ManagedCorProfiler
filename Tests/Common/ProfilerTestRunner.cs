@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
+using Tests.Common.Exceptions;
 
 namespace Tests.Common
 {
@@ -66,7 +68,14 @@ namespace Tests.Common
                 corerunName = "corerun";
             }
 
-            return Path.Combine(Environment.GetEnvironmentVariable("CORE_ROOT"), corerunName);
+            var coreRoot = Environment.GetEnvironmentVariable("CORERUN_PATH");
+            
+            if (string.IsNullOrEmpty(corerunName))
+            {
+                throw new ArgumentException(coreRoot, "CORERUN_PATH");
+            }
+
+            return Path.Combine(coreRoot, corerunName);
         }
 
         private static void FailFastWithMessage(string error)
@@ -99,7 +108,7 @@ namespace Tests.Common
             program = GetCorerunPath();
             string profilerPath = GetProfilerPath();
         
-            if (!Path.Exists(profilerPath))
+            if (!File.Exists(profilerPath))
             {
                 throw new ArgumentException("Cannot locate profiler dll.");
             }
@@ -157,6 +166,12 @@ namespace Tests.Common
 
             envVars.Add("Profiler_Test_Name", testName);
 
+            var runtimeDirectory = RuntimeEnvironment.GetRuntimeDirectory();
+            
+            Environment.SetEnvironmentVariable("CORE_LIBRARIES", runtimeDirectory);
+
+            Environment.SetEnvironmentVariable("CORE_ROOT", runtimeDirectory);
+
             if (!File.Exists(profilerPath))
             {
                 FailFastWithMessage("Profiler library not found at expected path: " + profilerPath);
@@ -202,6 +217,11 @@ namespace Tests.Common
             // because lots of verification happen in the profiler code, where it is hard to change the
             // program return value.
 
+            if (verifier.HasSkippedOutput)
+            {
+                throw new RuntimeNotSupportedException();
+            }
+
             if (!verifier.HasPassingOutput)
             {
                 FailFastWithMessage("Profiler tests are expected to contain the text \'" + verifier.SuccessPhrase + "\' in the console output " +
@@ -224,13 +244,25 @@ namespace Tests.Common
         class ProfileeOutputVerifier
         {
             public string SuccessPhrase = "PROFILER TEST PASSES";
+
+            public string SkipPhrase = "PROFILER TEST SKIPPED";
+
             public bool HasPassingOutput { get; private set; }
+
+            public bool HasSkippedOutput { get; private set; }
 
             public void WriteLine(string message)
             {
-                if (message != null && message.Contains(SuccessPhrase))
+                if (message != null)
                 {
-                    HasPassingOutput = true;
+                    if (message.Contains(SuccessPhrase))
+                    {
+                        HasPassingOutput = true;
+                    }
+                    else if (message.Contains(SkipPhrase))
+                    {
+                        HasSkippedOutput = true;
+                    }
                 }
             }
 

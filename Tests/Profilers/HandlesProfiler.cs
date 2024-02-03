@@ -15,6 +15,7 @@ using ObjectID = nuint;
 using ClassID = nuint;
 using ClrProfiling.Shared;
 using ClrProfiling.Helpers;
+using Tests.Common.Utils;
 
 namespace TestsProfilers;
 
@@ -28,6 +29,7 @@ internal unsafe class HandlesProfiler : TestProfilerBase
     private ObjectHandleID _weakHandle = (void**)nint.Zero;
     private ObjectHandleID _pinnedHandle = (void**)nint.Zero;
     private nuint _pinnedObject;
+    private ICorProfilerInfo13* _corProfilerInfo13;
 
     // The goal of this test is to validate the ICorProfilerInfo13 handle management methods:
     //   CreateHandle (weak, strong, pinned)
@@ -51,7 +53,24 @@ internal unsafe class HandlesProfiler : TestProfilerBase
     {
         base.Initialize(unknown);
 
-        var hr = ProfilerInfo->SetEventMask2(
+        if (Runtime.IsNet7OrGreater() == false)
+        {
+            Console.WriteLine("PROFILER TEST SKIPPED: This profiler is only supported for runtime version >= 7.0.0");
+            return HRESULT.E_FAIL;
+        }
+
+        var hr = ProfilerInfo->QueryInterface(ICorProfilerInfo13.IID_Guid, out var pCorProfilerInfo13);
+
+        if (hr.Failed)
+        {
+            Console.WriteLine($"Profiler.dll!Profiler::Initialize failed to QI for ICorProfilerInfo13.");
+            return hr;
+        }
+
+        _corProfilerInfo13 = (ICorProfilerInfo13*)pCorProfilerInfo13;
+        _corProfilerInfo13->AddRef();
+
+        hr = ProfilerInfo->SetEventMask2(
             (uint)(COR_PRF_ENABLE_OBJECT_ALLOCATED | COR_PRF_MONITOR_OBJECT_ALLOCATED), 
             (uint)(COR_PRF_HIGH_BASIC_GC | COR_PRF_HIGH_MONITOR_LARGEOBJECT_ALLOCATED | COR_PRF_HIGH_MONITOR_PINNEDOBJECT_ALLOCATED));
 
@@ -76,7 +95,7 @@ internal unsafe class HandlesProfiler : TestProfilerBase
 
         ObjectID objectId = 0;
 
-        var hr = ProfilerInfo->GetObjectIDFromHandle(handle, &objectId);
+        var hr = _corProfilerInfo13->GetObjectIDFromHandle(handle, &objectId);
 
         if (hr.Failed)
         {
@@ -162,7 +181,7 @@ internal unsafe class HandlesProfiler : TestProfilerBase
         {
             fixed (void*** pWeakHandle = &_weakHandle)
             {
-                hr = ProfilerInfo->CreateHandle(objectId, COR_PRF_HANDLE_TYPE.COR_PRF_HANDLE_TYPE_WEAK, pWeakHandle);
+                hr = _corProfilerInfo13->CreateHandle(objectId, COR_PRF_HANDLE_TYPE.COR_PRF_HANDLE_TYPE_WEAK, pWeakHandle);
             }
 
             if (hr.Failed)
@@ -179,7 +198,7 @@ internal unsafe class HandlesProfiler : TestProfilerBase
         {
             fixed (void*** pStrongHandle = &_strongHandle)
             {
-                hr = ProfilerInfo->CreateHandle(objectId, COR_PRF_HANDLE_TYPE.COR_PRF_HANDLE_TYPE_STRONG, pStrongHandle);
+                hr = _corProfilerInfo13->CreateHandle(objectId, COR_PRF_HANDLE_TYPE.COR_PRF_HANDLE_TYPE_STRONG, pStrongHandle);
             }
 
             if (hr.Failed)
@@ -200,7 +219,7 @@ internal unsafe class HandlesProfiler : TestProfilerBase
 
             fixed (void*** pPinnedHandle = &_pinnedHandle)
             {
-                hr = ProfilerInfo->CreateHandle(objectId, COR_PRF_HANDLE_TYPE.COR_PRF_HANDLE_TYPE_PINNED, pPinnedHandle);
+                hr = _corProfilerInfo13->CreateHandle(objectId, COR_PRF_HANDLE_TYPE.COR_PRF_HANDLE_TYPE_PINNED, pPinnedHandle);
             }
 
             if (hr.Failed)
@@ -274,7 +293,7 @@ internal unsafe class HandlesProfiler : TestProfilerBase
             ObjectID pinnedObject = CheckIfAlive("pinned", _pinnedHandle, true);
 
             // Destroy strong and pinned handles so next GC will release the objects
-            hr = ProfilerInfo->DestroyHandle(_strongHandle);
+            hr = _corProfilerInfo13->DestroyHandle(_strongHandle);
             if (hr.Failed)
             {
                 _failures++;
@@ -286,11 +305,11 @@ internal unsafe class HandlesProfiler : TestProfilerBase
                 
                 fixed (void*** pStrongHandle = &_strongHandle)
                 {
-                    ProfilerInfo->CreateHandle(strongObject, COR_PRF_HANDLE_TYPE.COR_PRF_HANDLE_TYPE_WEAK, pStrongHandle);
+                    _corProfilerInfo13->CreateHandle(strongObject, COR_PRF_HANDLE_TYPE.COR_PRF_HANDLE_TYPE_WEAK, pStrongHandle);
                 }
             }
 
-            hr = ProfilerInfo->DestroyHandle(_pinnedHandle);
+            hr = _corProfilerInfo13->DestroyHandle(_pinnedHandle);
 
             if (hr.Failed)
             {
@@ -303,7 +322,7 @@ internal unsafe class HandlesProfiler : TestProfilerBase
 
                 fixed (void*** pPinnedHandle = &_pinnedHandle)
                 {
-                    ProfilerInfo->CreateHandle(pinnedObject, COR_PRF_HANDLE_TYPE.COR_PRF_HANDLE_TYPE_WEAK, pPinnedHandle);
+                    _corProfilerInfo13->CreateHandle(pinnedObject, COR_PRF_HANDLE_TYPE.COR_PRF_HANDLE_TYPE_WEAK, pPinnedHandle);
                 }
             }
         }
@@ -327,6 +346,9 @@ internal unsafe class HandlesProfiler : TestProfilerBase
     public override HRESULT Shutdown()
     {
         var hr = base.Shutdown();
+
+        if (_corProfilerInfo13 != null)
+            _corProfilerInfo13->Release();
 
         if (hr.Failed) return hr;
 
