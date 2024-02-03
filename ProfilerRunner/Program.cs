@@ -45,23 +45,19 @@ rootCommand.SetHandler(async (
     
     var loggerFactory = new SerilogLoggerFactory(Log.Logger);
 
-    var logger = loggerFactory.CreateLogger<CorerunProfilerRunner>();
+    var logger = loggerFactory.CreateLogger<DotnetProfilerRunner>();
 
     var profilerLogFile = Path.Combine(Environment.ProcessPath ?? Assembly.GetExecutingAssembly().Location, "prof.log");
 
     Console.WriteLine($"Profiler log file will be written at: {profilerLogFile}");
 
-    var runner = new CorerunProfilerRunner(logger: logger)
+    var runner = new DotnetProfilerRunner(targetApp.FullName, profPath.FullName, profClsid, logger: logger)
     {
-        ProfileeApplicationPath = targetApp.FullName,
-        ProfilerPath = profPath.FullName,
-        ProfilerId = profClsid,
         ProfileeArguments = "RunTest",
         ProfilerLogEnabled = profLogEnable,
         ProfilerLogToConsole = profLogToConsole,
         ProfilerLogToFile = profLogToFile,
-        ClrPath = @"C:\Program Files\dotnet\shared\Microsoft.NETCore.App\5.0.17",
-        LibrariesPath = Path.GetDirectoryName(targetApp.FullName),
+        ProfilerLogFile = profilerLogFile
     };
 
     if (profLogLevel != null)
@@ -79,7 +75,7 @@ rootCommand.SetHandler(async (
         Console.WriteLine($"profilee: {msg}");
     };
 
-    var exitCode = await runner.RunWithProfilerEnabled();
+    var exitCode = runner.RunWithProfilerEnabled();
 
 }, profileeArgument, profilerPathArgument, profilerClsidArgument,
    profilerLogEnable, profilerLogLevelOption, profilerLogToConsole, profilerLogToFile, profilerLogFilePath);

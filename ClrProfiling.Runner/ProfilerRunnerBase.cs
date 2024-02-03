@@ -1,8 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
+using System.Threading;
 
 namespace ClrProfiling.Runner;
 
@@ -10,11 +13,11 @@ public abstract class ProfilerRunnerBase : IProfilerRunner
 {
     private readonly ILogger<ProfilerRunnerBase> _logger;
 
-    required public Guid ProfilerId { get; init; }
+    public Guid ProfilerClsid { get; }
 
-    required public string ProfilerPath { get; init; }
+    public string ProfilerPath { get; }
 
-    required public string ProfileeApplicationPath { get; init; }
+    public string ProfileeApplicationPath { get; }
 
     public string ProfileeArguments { get; set; } = string.Empty;
 
@@ -38,7 +41,7 @@ public abstract class ProfilerRunnerBase : IProfilerRunner
 
     public string ReverseServerName {  get; set; } = string.Empty;
 
-    public Dictionary<string, string> EnviromentVariables { get; private set; } = null!;
+    public Dictionary<string, string> EnviromentVariables { get; set; } = null!;
 
     public bool ForwardProcessEnvironmentVariables { get; set; } = true;
 
@@ -46,13 +49,20 @@ public abstract class ProfilerRunnerBase : IProfilerRunner
 
     public int? ProcessId { get; private set; } = null;
 
-    public string HostProgram { get; init; }
+    public string HostProgram { get; }
 
     public event EventHandler<string> OnOutuputReceived;
 
-    protected ProfilerRunnerBase(string hostProgram, ILogger<ProfilerRunnerBase>? logger = null)
+    protected ProfilerRunnerBase(string hostProgram, 
+        string profileeApplicationPath,
+        string profilerPath,
+        Guid profilerClsid,
+        ILogger<ProfilerRunnerBase>? logger = null)
     {
         _logger = logger ?? NullLogger<ProfilerRunnerBase>.Instance;
+        ProfileeApplicationPath = profileeApplicationPath;
+        ProfilerPath = profilerPath;
+        ProfilerClsid = profilerClsid;
         HostProgram = hostProgram;
     }
 
@@ -68,9 +78,9 @@ public abstract class ProfilerRunnerBase : IProfilerRunner
             throw new InvalidOperationException($"Profilee dll library not found: '{ProfileeApplicationPath}'");
         }
 
-        if (ProfilerId == Guid.Empty)
+        if (ProfilerClsid == Guid.Empty)
         {
-            throw new InvalidOperationException($"Invalid profiler id: '{ProfilerId}'");
+            throw new InvalidOperationException($"Invalid profiler id: '{ProfilerClsid}'");
         }
 
         if (EnviromentVariables == null)
@@ -121,7 +131,7 @@ public abstract class ProfilerRunnerBase : IProfilerRunner
         return procStartInfo;
     }
 
-    public async Task<int> RunWithProfilerEnabled(CancellationToken cancellationToken = default)
+    public int RunWithProfilerEnabled(CancellationToken cancellationToken = default)
     {
         Validate();
 
@@ -167,7 +177,7 @@ public abstract class ProfilerRunnerBase : IProfilerRunner
 
                 for (var i = 0; i < NotificationCopies; i++)
                 {
-                    sb.Append($"{ProfilerPath}={{{ProfilerId}}};");
+                    sb.Append($"{ProfilerPath}={{{ProfilerClsid}}};");
                 }
 
                 EnviromentVariables.Add("CORECLR_ENABLE_NOTIFICATION_PROFILERS", "1");
@@ -177,7 +187,7 @@ public abstract class ProfilerRunnerBase : IProfilerRunner
             }
             else
             {
-                EnviromentVariables.Add("CORECLR_PROFILER", "{" + ProfilerId + "}");
+                EnviromentVariables.Add("CORECLR_PROFILER", "{" + ProfilerClsid + "}");
                 EnviromentVariables.Add("CORECLR_PROFILER_PATH", ProfilerPath);
             }
         }
@@ -186,7 +196,10 @@ public abstract class ProfilerRunnerBase : IProfilerRunner
         {
             _logger.LogInformation("ProfilerRunner: Launching profilee in reverse diagnostics port mode.");
 
-            ArgumentException.ThrowIfNullOrEmpty(ReverseServerName);
+            if (string.IsNullOrEmpty(ReverseServerName))
+            {
+                throw new ArgumentException(nameof(ReverseServerName));
+            }
 
             EnviromentVariables.Add("DOTNET_DiagnosticPorts", ReverseServerName);
         }
@@ -200,7 +213,6 @@ public abstract class ProfilerRunnerBase : IProfilerRunner
 
         if (CaptureProfileeOutput)
         {
-            process.ErrorDataReceived += ProcessDataReceived;
             process.OutputDataReceived += ProcessDataReceived;
         }
 
@@ -216,10 +228,9 @@ public abstract class ProfilerRunnerBase : IProfilerRunner
         if (CaptureProfileeOutput)
         {
             process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
         }
 
-        await process.WaitForExitAsync(cancellationToken);
+        process.WaitForExit();
 
         _logger.LogDebug("ProfilerRunner: profilee process terminated exitCode={ExitCode}", process.ExitCode);
 

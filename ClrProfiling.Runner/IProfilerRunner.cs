@@ -1,15 +1,20 @@
 ﻿
+using System;
+using System.Threading;
+
 namespace ClrProfiling.Runner;
 
 public interface IProfilerRunner
 {
-    Guid ProfilerId { get; init; }
+    Guid ProfilerClsid { get; }
 
-    string ProfilerPath { get; init; }
+    string ProfilerPath { get; }
 
-    string ProfileeApplicationPath { get; init; }
+    string ProfileeApplicationPath { get; }
 
     void AttachToProcess(int pid);
 
-    Task<int> RunWithProfilerEnabled(CancellationToken cancellationToken = default);
+    int RunWithProfilerEnabled(CancellationToken cancellationToken = default);
+
+    public event EventHandler<string> OnOutuputReceived;
 }

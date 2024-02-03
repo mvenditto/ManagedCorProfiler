@@ -1,4 +1,6 @@
-﻿namespace ClrProfiling.Runner;
+﻿using System;
+
+namespace ClrProfiling.Runner;
 
 [Flags]
 public enum ProfileeOptions

@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using System;
 using System.Diagnostics;
+using System.IO;
 
 namespace ClrProfiling.Runner;
 
@@ -9,14 +11,19 @@ public class CorerunProfilerRunner : ProfilerRunnerBase
     private readonly ILogger<CorerunProfilerRunner> _logger;
 
     // Where to search the runtime binary, default to corerun location if not null;
-    public string? ClrPath { get; init; } = null;
+    public string? ClrPath { get; set; } = null;
 
     // Additional included directory for class library assemblies
-    public string? LibrariesPath { get; init; } = null;
+    public string? LibrariesPath { get; set; } = null;
 
-    public bool WaitForDebuggerAttach { get; init; } = false;
+    public bool WaitForDebuggerAttach { get; set; } = false;
 
-    public CorerunProfilerRunner(string corerunPath = "corerun", ILogger<CorerunProfilerRunner>? logger = null) : base(corerunPath, logger)
+    public CorerunProfilerRunner(
+        string profileeApp,
+        string profilerPath,
+        Guid profilerClsid, 
+        string corerunPath = "corerun", 
+        ILogger<CorerunProfilerRunner>? logger = null) : base(corerunPath, profileeApp, profilerPath, profilerClsid, logger)
     {
         _logger = logger ?? NullLogger<CorerunProfilerRunner>.Instance;
     }
