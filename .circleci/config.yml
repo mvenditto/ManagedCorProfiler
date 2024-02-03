@@ -40,10 +40,9 @@ jobs:
       - run:
           name: Test results
           command: |
-              cd ./Tests
               dotnet tool install -g trx2junit
               $Env:Path += ";$Env:USERPROFILE\.dotnet\tools"
-              trx2junit TestResults/*.trx
+              trx2junit .\Tests\Tests\TestResults\TestResults\*.trx
       - store_test_results:
           path: ManagedCorProfiler/Tests/TestResults
 
