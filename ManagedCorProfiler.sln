@@ -69,8 +69,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModuleLoadsProfiler", "Samp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClrProfiling.Runner", "ClrProfiling.Runner\ClrProfiling.Runner.csproj", "{BE284997-EACE-428D-86FE-63834C980F2B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProfilerRunner", "ProfilerRunner\ProfilerRunner.csproj", "{B9FE95CD-BA6B-4163-9DAA-613CCFAD765D}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -355,18 +353,6 @@ Global
 		{BE284997-EACE-428D-86FE-63834C980F2B}.Release|x64.Build.0 = Release|Any CPU
 		{BE284997-EACE-428D-86FE-63834C980F2B}.Release|x86.ActiveCfg = Release|Any CPU
 		{BE284997-EACE-428D-86FE-63834C980F2B}.Release|x86.Build.0 = Release|Any CPU
-		{B9FE95CD-BA6B-4163-9DAA-613CCFAD765D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B9FE95CD-BA6B-4163-9DAA-613CCFAD765D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B9FE95CD-BA6B-4163-9DAA-613CCFAD765D}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{B9FE95CD-BA6B-4163-9DAA-613CCFAD765D}.Debug|x64.Build.0 = Debug|Any CPU
-		{B9FE95CD-BA6B-4163-9DAA-613CCFAD765D}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{B9FE95CD-BA6B-4163-9DAA-613CCFAD765D}.Debug|x86.Build.0 = Debug|Any CPU
-		{B9FE95CD-BA6B-4163-9DAA-613CCFAD765D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B9FE95CD-BA6B-4163-9DAA-613CCFAD765D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B9FE95CD-BA6B-4163-9DAA-613CCFAD765D}.Release|x64.ActiveCfg = Release|Any CPU
-		{B9FE95CD-BA6B-4163-9DAA-613CCFAD765D}.Release|x64.Build.0 = Release|Any CPU
-		{B9FE95CD-BA6B-4163-9DAA-613CCFAD765D}.Release|x86.ActiveCfg = Release|Any CPU
-		{B9FE95CD-BA6B-4163-9DAA-613CCFAD765D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -391,7 +377,6 @@ Global
 		{9E8B5D9A-AD94-4476-A125-6A894E4C7234} = {0CF4F019-2CBF-482A-9DC9-F6707179B932}
 		{D132A51B-B07A-46E6-80AE-F26617BD3ACE} = {9E8B5D9A-AD94-4476-A125-6A894E4C7234}
 		{81E4C20A-46B7-4FA1-AF4F-216897206A2A} = {B6EE7536-2FD4-4D05-B3E3-F9A794F45C6D}
-		{B9FE95CD-BA6B-4163-9DAA-613CCFAD765D} = {B6EE7536-2FD4-4D05-B3E3-F9A794F45C6D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {33D9E3AF-5810-41DD-9EEE-1E09B5B8ECB4}
