@@ -12,6 +12,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClrProfiling.Generator", "ClrProfiling.Generator\ClrProfiling.Generator.csproj", "{A384B3AC-AC08-40DB-B6D9-BEE852B7F385}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{B6EE7536-2FD4-4D05-B3E3-F9A794F45C6D}"
+	ProjectSection(SolutionItems) = preProject
+		Samples\build-sample_win-x64.cmd = Samples\build-sample_win-x64.cmd
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0CF4F019-2CBF-482A-9DC9-F6707179B932}"
 	ProjectSection(SolutionItems) = preProject
@@ -64,9 +67,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Handles", "Tests\Handles\Ha
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModuleLoadsProfiler", "Samples\ModuleLoadsProfiler\ModuleLoadsProfiler.csproj", "{81E4C20A-46B7-4FA1-AF4F-216897206A2A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClrProfiling.Runner", "ClrProfiling.Runner\ClrProfiling.Runner.csproj", "{BE284997-EACE-428D-86FE-63834C980F2B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClrProfiling.Runner", "ClrProfiling.Runner\ClrProfiling.Runner.csproj", "{BE284997-EACE-428D-86FE-63834C980F2B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProfilerRunner", "ProfilerRunner\ProfilerRunner.csproj", "{B9FE95CD-BA6B-4163-9DAA-613CCFAD765D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProfilerRunner", "ProfilerRunner\ProfilerRunner.csproj", "{B9FE95CD-BA6B-4163-9DAA-613CCFAD765D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
